@@ -1,0 +1,22 @@
+{
+  "lint": {
+    "@type": "method",
+    "@run": [
+      "(@import shell/bash) run \"./node_modules/.bin/eslint .\"",
+      "(@import shell/bash) run \"./node_modules/.bin/prettier-eslint-check '**/*.js'\""
+    ],
+    "@listen": "@lint"
+  },
+  "dependencies": {
+    "@import": "js/npm-dependencies#^0.1.0",
+    "@value": {
+      "babel-eslint": "~10.0.1",
+      "eslint": "~5.9.0",
+      "eslint-config-xo": "~0.25.0",
+      "eslint-plugin-react": "~7.11.1",
+      "prettier": "~1.15.2",
+      "prettier-eslint-check": "^1.0.2",
+      "prettier-eslint-cli": "^4.7.1"
+    }
+  }
+}
