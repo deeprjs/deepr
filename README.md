@@ -190,7 +190,7 @@ When executing a method, it is often useful to pass some parameters. Here's how 
 });
 ```
 
-The reserved key `$params` allows to pass parameters to a method and `$return` is the way to specify what to do with the result.
+The keyword `$params` allows to pass parameters to a method and `$return` is the way to specify what to do with the result.
 
 Note: in the previous examples, we didn't have parameters, so we didn't need to specify the `$return` in our queries, it was implicit.
 
@@ -320,7 +320,7 @@ Now, let's compose a more complicated query involving several chained methods:
 });
 ```
 
-It works. Doing so allows to chain several methods, but it is not very pretty. Fortunately, there is the reserved keyword `$invoke` which simplifies this type of query:
+It works. Doing so allows to chain several methods, but it is not very pretty. Fortunately, there is the keyword `$invoke` which simplifies this type of query:
 
 ```js
 // Request:
