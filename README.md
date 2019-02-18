@@ -16,7 +16,7 @@ First of all, with GraphQL, it is not possible to invoke methods on collections.
 }
 ```
 
-To make it works, it is necessary to introduce some additional models, as Relay does with the [Connections](https://facebook.github.io/relay/graphql/connections.htm). We think that such a solution brings complexity and confusion.
+To make it work, it is necessary to introduce some additional models, as Relay does with the [Connections](https://facebook.github.io/relay/graphql/connections.htm). We think that such a solution brings complexity and confusion.
 
 Another issue is the GraphQL execution model. Having queries executed in parallel seems like a good idea at first, but it has unfortunate consequences on the developer experience. Since the execution order of nested mutations is unpredictable, it is [not recommended](https://github.com/graphql/graphql-js/issues/221#issuecomment-157481861) to do something like this:
 
@@ -47,6 +47,10 @@ Deepr does not specify the use of a particular language. So, although the follow
 
 ### Simple queries
 
+Here is the gist: queries are plain JavaScript objects that can be nested.
+
+Besides some keywords prefixed by `$`, all object keys are the names of the **methods** that will be called in the **context** of the parent node.
+
 Let's start with a simple query:
 
 ```js
@@ -67,9 +71,13 @@ Let's start with a simple query:
 });
 ```
 
+Here we are calling a method called `movie` in the top-level context (the "root").
+
+Then, inside the context of `movie`, we are calling `title` and `year` methods, that may or may not resolve with the value of some fields, it does not matter, the spec does not define what `movie`, `title` and `year` methods do.
+
 So far, it looks like GraphQL. The only significant difference is, since we use JavaScript objects, we must specify values for the keys `title` and `year`. Specifying `true` as value means that we want to return or invoke the corresponding field or method.
 
-Here is another simple query:
+Instead of querying a single movie, let's query a collection of movies:
 
 ```js
 // Request:
@@ -117,7 +125,7 @@ Now, you might ask yourself, how to reach the elements of the `movies` collectio
 });
 ```
 
-By embedding a query in an array, we specify that the context of the query is the elements of the collection rather than the collection itself.
+By embedding a query in an array, we specify that the context of the query is the **elements** of the collection rather than the collection itself.
 
 Now, let's see how to query both a collection and its elements:
 
@@ -184,7 +192,38 @@ When executing a method, it is often useful to pass some parameters. Here's how 
 
 The reserved key `$params` allows to pass parameters to a method and `$return` is the way to specify what to do with the result.
 
-By using _aliases_, it is possible to execute a method several times with different parameters:
+Note: in the previous examples, we didn't have parameters, so we didn't need to specify the `$return` in our queries, it was implicit.
+
+```js
+{
+  movies: {
+    count: true;
+  }
+}
+```
+
+is the same as:
+
+```js
+{
+  movies: {
+    $return: {
+      count: true;
+    }
+  }
+}
+```
+
+### Aliases
+
+By using _aliases_, it is possible to execute a method several times with different parameters, avoiding conflict names inside the values returned by the method.
+
+For example, in the following request, we first call `movies` method and assign the result to `actionMovies`.
+Then, we call the same `movie` method, with different parameters, and assign the result to `dramaMovies`.
+
+Doing this we can assign both results `actionMovies` and `drameMovies` in the query response.
+
+It's a bit similar to how we can rename variables when objects are destructured in JavaScript ES6.
 
 ```js
 // Request:
@@ -281,7 +320,7 @@ Now, let's compose a more complicated query involving several chained methods:
 });
 ```
 
-It works. Doing so allows to chain several methods, but it is not very pretty. Fortunately, there is the reserved key `$invoke` which simplifies this type of query:
+It works. Doing so allows to chain several methods, but it is not very pretty. Fortunately, there is the reserved keyword `$invoke` which simplifies this type of query:
 
 ```js
 // Request:
@@ -303,13 +342,42 @@ It works. Doing so allows to chain several methods, but it is not very pretty. F
 });
 ```
 
-`$invoke` provides a simple way to chain the execution of several methods while improving the readability of the results. Note that in this case `$params` is not used to pass parameters. Parameters can simply be specified as values of the method keys.
+`$invoke` provides a simple way to chain the execution of several methods while improving the readability of the results by avoiding too many levels of nested objects. Note that in this case `$params` is not used to pass parameters. Parameters can simply be specified as values of the method keys.
 
-`$invoke` can also be used to invoke a single method. This is handy for performing an operation without altering the shape of the response:
+`$invoke` can also be used to invoke a single method. This is handy for performing an operation without altering the shape of the response.
+
+Let's say we have a `reverse` method on our `movies` collection.
+We could write the method like this:
 
 ```js
-// Request:
+{
+  movies: {
+    reverse: {
+      $return: [
+        {
+          title: true,
+          year: true
+        }
+      ];
+    }
+  }
+}
+```
+
+but it would add an extra level in the response:
+
+```js
 ({
+  movies: {
+    reverse: [{title: 'Inception', year: 2010}, {title: 'The Matrix', year: 1999}]
+  }
+});
+```
+
+Instead, we can call the `reverse` method using `$invoke` keyword:
+
+```js
+{
   movies: {
     $invoke: 'reverse',
     $return: [
@@ -319,9 +387,12 @@ It works. Doing so allows to chain several methods, but it is not very pretty. F
       }
     ]
   }
-});
+}
+```
 
-// Response:
+and the response would be a bit less verbose:
+
+```js
 ({
   movies: [{title: 'Inception', year: 2010}, {title: 'The Matrix', year: 1999}]
 });
