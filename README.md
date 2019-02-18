@@ -4,7 +4,7 @@ A specification for invoking remote methods, deeply!
 
 ## Why?
 
-[GraphQL](https://graphql.org/) brought a powerful idea — the ability to invoke multiple methods in a single call, and more importantly, the ability to invoke methods based on the result of other methods. However, we feel that the design of GraphQL is not quite right. Some crucial features are missing and some features should be moved to another layer of the stack.
+[GraphQL](https://graphql.org/) brought a powerful idea — the ability to invoke multiple methods in a single call, and more importantly, the ability to invoke methods based on the result of other methods. However, we feel that the design of GraphQL is not quite right. Some crucial features are missing and some features should be removed or implemented at another layer of the stack.
 
 First of all, with GraphQL, it is not possible to invoke methods on collections. When we specify a query for a collection, it is executed on the elements of the collection, and not on the collection itself. It would be nice if we could differentiate the two contexts. For example, depending on the schema, this query might not return the expected result:
 
