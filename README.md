@@ -33,6 +33,8 @@ Another issue is the GraphQL execution model. Having queries executed in paralle
 
 Parallelizing the execution of the requests is an optimization matter, and we believe it should better be addressed at another layer of the backend stack.
 
+Then, there is the way the execution is handled. With GraphQL, it is required to implement resolvers for each operation. This resolver layer seems a little cumbersome to us. When the business layer is implemented in an object-oriented way, why not just directly invoke the methods of the objects? Some would say it is good practice to add an API layer on top of the business layer. Well, it's debatable, but in any case, we believe that the query execution should not require an additional layer. If the developer wants to add an API layer, it's up to him to do so.
+
 Another point is the type system. Providing schemas and types is certainly an important feature, but we believe it should not be included in the core of the language. A fine type system (such as those provided by TypeScript or Flow) should be optional and implemented orthogonally as an extension. Or even better, if types are specified deeper in the backend stack (i.e., in the business layer), an additional type system may not be necessary.
 
 Finally, let's question the very nature of GraphQL: the language. Indeed, do we need another language? The GraphQL language makes queries prettier, but is it worth it? Adding a new language to the stack is no small matter, it brings a whole new world that must be connected — both on the client and server sides — to an actual programming language. As a result, everything gets more complicated.
