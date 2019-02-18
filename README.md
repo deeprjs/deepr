@@ -2,7 +2,7 @@
 
 A specification for invoking remote methods, deeply!
 
-## Why
+## Why?
 
 [GraphQL](https://graphql.org/) brought a powerful idea — the ability to invoke multiple methods in a single call, and more importantly, the ability to invoke methods based on the result of other methods. However, we feel that the design of GraphQL is not quite right. Some crucial features are missing and some features should be moved to another layer of the stack.
 
