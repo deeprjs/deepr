@@ -47,9 +47,9 @@ Deepr does not specify the use of a particular language. So, although the follow
 
 ### Simple queries
 
-Here is the gist: queries are plain JavaScript objects that can be nested.
+Here is the gist: queries are plain JavaScript objects, made of nested key-value nodes.
 
-Besides some keywords prefixed by `$`, all object keys are the names of the **methods** that will be called in the **context** of the parent node.
+Besides some keywords prefixed by `$`, every node key is the name of either an **attribute** or a **method** that will be called in the **context** of the parent node.
 
 Let's start with a simple query:
 
@@ -73,7 +73,7 @@ Let's start with a simple query:
 
 Here we are calling a method called `movie` in the top-level context (the "root").
 
-Then, inside the context of `movie`, we are calling `title` and `year` methods, that may or may not resolve with the value of some fields, it does not matter, the spec does not define what `movie`, `title` and `year` methods do.
+Then, inside the context of `movie`, we are calling `title` and `year` attribite methods, depending on the implmentation of the `movie` object, it does not matter because the spec does not define what `movie`, `title` and `year` are.
 
 So far, it looks like GraphQL. The only significant difference is, since we use JavaScript objects, we must specify values for the keys `title` and `year`. Specifying `true` as value means that we want to return or invoke the corresponding field or method.
 
@@ -216,12 +216,12 @@ is the same as:
 
 ### Aliases
 
-By using _aliases_, it is possible to execute a method several times with different parameters, avoiding conflict names inside the values returned by the method.
+By using _aliases_, it is possible to execute a method several times with different parameters, avoiding conflict names inside the current context.
 
 For example, in the following request, we first call `movies` method and assign the result to `actionMovies`.
-Then, we call the same `movie` method, with different parameters, and assign the result to `dramaMovies`.
+Then, we call the same `movies` method, with different parameters, and assign the result to `dramaMovies`.
 
-Doing this we can assign both results `actionMovies` and `drameMovies` in the query response.
+Doing this we can access both method results `actionMovies` and `drameMovies` in the query response.
 
 It's a bit similar to how we can rename variables when objects are destructured in JavaScript ES6.
 
