@@ -185,6 +185,24 @@ Basically we are nesting the current context one level deeper, under a new key.
 
 We did that in the previous example because we wanted to access our array of movies under a new key called `items`, while adding a `count` property to the `movies` object.
 
+If the target is omitted, it means that the evaluation of the method or the field does not generate a new object.
+
+For example, note how the key `title` is absent from the response, because we use the key `"title:"` instead of `"title"`:
+
+```js
+// Request
+{
+  movie: {
+    'title:': true
+  }
+}
+
+// Response
+{
+  movie: 'Inception'
+}
+```
+
 #### Object value syntax
 
 Object **values** can be either:
