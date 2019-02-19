@@ -57,25 +57,25 @@ Let's start with a simple query:
 
 ```js
 // Request:
-({
+{
   movie: {
     title: true,
     year: true
   }
-});
+}
 
 // Response:
-({
+{
   movie: {
     title: 'Inception',
     year: 2010
   }
-});
+};
 ```
 
 Here we are calling a method called `movie` in the top-level context (the "root").
 
-Then, inside the context of `movie`, we are calling `title` and `year` attribite methods, depending on the implmentation of the `movie` object, it does not matter because the spec does not define what `movie`, `title` and `year` are.
+Then, inside the context of `movie`, we are calling `title` and `year` attribute methods, depending on the implementation of the `movie` object, it does not matter because the spec does not define what `movie`, `title` and `year` are.
 
 So far, it looks like GraphQL. The only significant difference is, since we use JavaScript objects, we must specify values for the keys `title` and `year`. Specifying `true` as value means that we want to return or invoke the corresponding field or method.
 
@@ -83,18 +83,18 @@ Instead of querying a single movie, let's query a collection of movies:
 
 ```js
 // Request:
-({
+{
   movies: {
-    count: true
+    count: true;
   }
-});
+}
 
 // Response:
-({
+{
   movies: {
-    count: 2
+    count: 2;
   }
-});
+}
 ```
 
 Nothing surprising here, we're just executing the `count` method on the `movies` collection.
@@ -103,17 +103,17 @@ Now, you might ask yourself, how to reach the elements of the `movies` collectio
 
 ```js
 // Request:
-({
+{
   movies: [
     {
       title: true,
       year: true
     }
-  ]
-});
+  ];
+}
 
 // Response:
-({
+{
   movies: [
     {
       title: 'Inception',
@@ -123,8 +123,8 @@ Now, you might ask yourself, how to reach the elements of the `movies` collectio
       title: 'The Matrix',
       year: 1999
     }
-  ]
-});
+  ];
+}
 ```
 
 By embedding a query in an array, we specify that the context of the query is the **elements** of the collection rather than the collection itself.
@@ -133,20 +133,20 @@ Now, let's see how to query both a collection and its elements:
 
 ```js
 // Request:
-({
+{
   movies: {
     count: true,
-    '$this:items': [
+    ':items': [
       {
         title: true,
         year: true
       }
     ]
   }
-});
+}
 
 // Response:
-({
+{
   movies: {
     count: 2,
     items: [
@@ -160,10 +160,38 @@ Now, let's see how to query both a collection and its elements:
       }
     ]
   }
-});
+}
 ```
 
-Here the trick was to use `$this` which is a built-in method that returns the current context, and `:` which allows you to define an _alias_ named `items`.
+This example introduces the full syntax of the objects keys, that we will explain in the following section.
+
+### Key-value full syntax
+
+#### `'source:target'` key syntax
+
+Object **keys** are made of 2 parts, a "source" and a "target", separated by a column `:` character.
+
+- The "source" is the method or the field name, evaluated in the current context.
+- You can think about the `target` as a way to create aliases, a way to rename things in the query response (similar to [GraphQL aliases](https://graphql.org/learn/queries/#aliases))
+
+For example `createdAt:date` key means the `created_at` field (or method) result will appear under a key called `date` in the response.
+
+If there is no `:` character it means that source and target are the same, it's the most frequent use-case, when the response structure mirrors the query structure.
+
+If the source is omitted, it means the current context will be re-used in the response as it is, without any processing.
+
+For example, `:items` means we take the current context and put it inside an object whose key is `items`.
+Basically we are nesting the current context one level deeper, under a new key.
+
+We did that in the previous example because we wanted to access our array of movies under a new key called `items`, while adding a `count` property to the `movies` object.
+
+#### Object value syntax
+
+Object **values** can be either:
+
+- The boolean `true`: the result of the method or the field will be included in the response, following the format defined in the key (see above)
+- An object: the execution will continue recursively, applying every key to the parent context
+- An array containing a single object: when the parent context is an array of items, every item will be processed by the single object, in a way that is similar to `Array.map()`
 
 ### Parameters
 
@@ -171,7 +199,7 @@ When executing a method, it is often useful to pass some parameters. Here's how 
 
 ```js
 // Request:
-({
+{
   movies: {
     $params: {filter: {year: 2010}},
     $return: [
@@ -180,16 +208,16 @@ When executing a method, it is often useful to pass some parameters. Here's how 
       }
     ]
   }
-});
+}
 
 // Response:
-({
+{
   movies: [
     {
       title: 'Inception'
     }
   ]
-});
+}
 ```
 
 The keyword `$params` allows to pass parameters to a method and `$return` is the way to specify what to do with the result.
@@ -223,13 +251,13 @@ By using _aliases_, it is possible to execute a method several times with differ
 For example, in the following request, we first call `movies` method and assign the result to `actionMovies`.
 Then, we call the same `movies` method, with different parameters, and assign the result to `dramaMovies`.
 
-Doing this we can access both method results `actionMovies` and `drameMovies` in the query response.
+Doing this we can access both method results `actionMovies` and `dramaMovies` in the query response.
 
 It's a bit similar to how we can rename variables when objects are destructured in JavaScript ES6.
 
 ```js
 // Request:
-({
+{
   'movies:actionMovies': {
     $params: {filter: {genre: 'action'}},
     $return: [
@@ -246,10 +274,10 @@ It's a bit similar to how we can rename variables when objects are destructured 
       }
     ]
   }
-});
+}
 
 // Response:
-({
+{
   actionMovies: [
     {
       title: 'Inception'
@@ -263,7 +291,7 @@ It's a bit similar to how we can rename variables when objects are destructured 
       title: 'Forrest Gump'
     }
   ]
-});
+}
 ```
 
 ### Chained queries
@@ -272,7 +300,7 @@ Now, let's compose a more complicated query involving several chained methods:
 
 ```js
 // Request:
-({
+{
   movies: {
     filter: {
       $params: {country: 'USA'},
@@ -297,10 +325,10 @@ Now, let's compose a more complicated query involving several chained methods:
       }
     }
   }
-});
+}
 
 // Response:
-({
+{
   movies: {
     filter: {
       sort: {
@@ -319,14 +347,14 @@ Now, let's compose a more complicated query involving several chained methods:
       }
     }
   }
-});
+}
 ```
 
 It works. Doing so allows to chain several methods, but it is not very pretty. Fortunately, there is the keyword `$invoke` which simplifies this type of query:
 
 ```js
 // Request:
-({
+{
   movies: {
     $invoke: [{filter: {country: 'USA'}}, {sort: {by: 'year'}}, {skip: 5}, {limit: 10}],
     $return: [
@@ -336,12 +364,12 @@ It works. Doing so allows to chain several methods, but it is not very pretty. F
       }
     ]
   }
-});
+}
 
 // Response:
-({
+{
   movies: [{title: 'The Matrix', year: 1999}, {title: 'Inception', year: 2010}]
-});
+}
 ```
 
 `$invoke` provides a simple way to chain the execution of several methods while improving the readability of the results by avoiding too many levels of nested objects. Note that in this case `$params` is not used to pass parameters. Parameters can simply be specified as values of the method keys.
@@ -369,11 +397,11 @@ We could write the method like this:
 but it would add an extra level in the response:
 
 ```js
-({
+{
   movies: {
-    reverse: [{title: 'Inception', year: 2010}, {title: 'The Matrix', year: 1999}]
+    reverse: [{title: 'Inception', year: 2010}, {title: 'The Matrix', year: 1999}];
   }
-});
+}
 ```
 
 Instead, we can call the `reverse` method using `$invoke` keyword:
@@ -395,9 +423,9 @@ Instead, we can call the `reverse` method using `$invoke` keyword:
 and the response would be a bit less verbose:
 
 ```js
-({
-  movies: [{title: 'Inception', year: 2010}, {title: 'The Matrix', year: 1999}]
-});
+{
+  movies: [{title: 'Inception', year: 2010}, {title: 'The Matrix', year: 1999}];
+}
 ```
 
 ### Mutations
@@ -410,23 +438,23 @@ Here is how we could create a record:
 
 ```js
 // Request:
-({
+{
   movies: {
     create: {
       $params: {title: 'Avatar', country: 'USA'},
       $return: {id: true}
     }
   }
-});
+}
 
 // Response:
-({
+{
   movies: {
     create: {
       id: 'cjrts72gy00ik01rv6eins4se'
     }
   }
-});
+}
 ```
 
 Unlike GraphQL, Deepr does not differentiate queries and mutations. So, performing a mutation is just a matter of calling the right method.
@@ -437,21 +465,21 @@ Now that we have added a record, let's fetch it:
 
 ```js
 // Request:
-({
+{
   movie: {
     $params: {id: 'cjrts72gy00ik01rv6eins4se'},
     $return: {id: true, title: true, country: true}
   }
-});
+};
 
 // Response:
-({
+{
   movie: {
     id: 'cjrts72gy00ik01rv6eins4se',
     title: 'Avatar',
     country: 'USA'
   }
-});
+}
 ```
 
 #### Update
@@ -460,7 +488,7 @@ To modify a record, we could do so:
 
 ```js
 // Request:
-({
+{
   movie: {
     $params: {id: 'cjrts72gy00ik01rv6eins4se'},
     $return: {
@@ -470,16 +498,16 @@ To modify a record, we could do so:
       }
     }
   }
-});
+}
 
 // Response:
-({
+{
   movie: {
     update: {
       id: 'cjrts72gy00ik01rv6eins4se'
     }
   }
-});
+}
 ```
 
 #### Delete
@@ -488,7 +516,7 @@ Finally, here is how we could delete a record:
 
 ```js
 // Request:
-({
+{
   movie: {
     $params: {id: 'cjrts72gy00ik01rv6eins4se'},
     $return: {
@@ -498,17 +526,17 @@ Finally, here is how we could delete a record:
       }
     }
   }
-});
+}
 
 // Response:
-({
+{
   movie: {
     delete: {
       id: 'cjrts72gy00ik01rv6eins4se',
       hasBeenDeleted: true
     }
   }
-});
+}
 ```
 
 ### Relations
@@ -519,7 +547,7 @@ It's actually pretty straightforward. Here's how we could fetch some movies with
 
 ```js
 // Request:
-({
+{
   movies: {
     $params: {filter: {country: 'USA'}},
     $return: {
@@ -536,10 +564,10 @@ It's actually pretty straightforward. Here's how we could fetch some movies with
       }
     }
   }
-});
+}
 
 // Response:
-({
+{
   movies: [
     {
       title: 'Inception',
@@ -570,12 +598,12 @@ It's actually pretty straightforward. Here's how we could fetch some movies with
       ]
     }
   ]
-});
+}
 ```
 
 ### Subscriptions
 
-We don't beleive that subscriptions should be included in the core specifications of Deepr. We acknowledge it is an important feature though, and it might come later as an extension.
+We don't believe that subscriptions should be included in the core specifications of Deepr. We acknowledge it is an important feature though, and it might come later as an extension.
 
 ## Implementation
 
