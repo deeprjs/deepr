@@ -55,20 +55,22 @@ Besides some keywords prefixed by `$`, every node key is the name of either an *
 
 Let's start with a simple query:
 
-```js
-// Request:
+```json
 {
-  movie: {
-    title: true,
-    year: true
+  "movie": {
+    "title": true,
+    "year": true
   }
 }
+```
 
-// Response:
+It will return:
+
+```json
 {
-  movie: {
-    title: 'Inception',
-    year: 2010
+  "movie": {
+    "title": "Inception",
+    "year": 2010
   }
 };
 ```
@@ -81,18 +83,20 @@ So far, it looks like GraphQL. The only significant difference is, since we use 
 
 Instead of querying a single movie, let's query a collection of movies:
 
-```js
-// Request:
+```json
 {
-  movies: {
-    count: true;
+  "movies": {
+    "count": true
   }
 }
+```
 
-// Response:
+It will return:
+
+```json
 {
-  movies: {
-    count: 2;
+  "movies": {
+    "count": 2
   }
 }
 ```
@@ -101,29 +105,31 @@ Nothing surprising here, we're just executing the `count` method on the `movies`
 
 Now, you might ask yourself, how to reach the elements of the `movies` collection? That's easy:
 
-```js
-// Request:
+```json
 {
-  movies: [
+  "movies": [
     {
-      title: true,
-      year: true
+      "title": true,
+      "year": true
     }
-  ];
+  ]
 }
+```
 
-// Response:
+It will return:
+
+```json
 {
-  movies: [
+  "movies": [
     {
-      title: 'Inception',
-      year: 2010
+      "title": "Inception",
+      "year": 2010
     },
     {
-      title: 'The Matrix',
-      year: 1999
+      "title": "The Matrix",
+      "year": 1999
     }
-  ];
+  ]
 }
 ```
 
@@ -131,32 +137,34 @@ By embedding a query in an array, we specify that the context of the query is th
 
 Now, let's see how to query both a collection and its elements:
 
-```js
-// Request:
+```json
 {
-  movies: {
-    count: true,
-    ':items': [
+  "movies": {
+    "count": true,
+    ":items": [
       {
-        title: true,
-        year: true
+        "title": true,
+        "year": true
       }
     ]
   }
 }
+```
 
-// Response:
+It will return:
+
+```json
 {
-  movies: {
-    count: 2,
-    items: [
+  "movies": {
+    "count": 2,
+    "items": [
       {
-        title: 'Inception',
-        year: 2010
+        "title": "Inception",
+        "year": 2010
       },
       {
-        title: 'The Matrix',
-        year: 1999
+        "title": "The Matrix",
+        "year": 1999
       }
     ]
   }
@@ -189,17 +197,19 @@ If the target is omitted, it means that the evaluation of the method or the fiel
 
 For example, note how the key `title` is absent from the response, because we use the key `"title:"` instead of `"title"`:
 
-```js
-// Request
+```json
 {
-  movie: {
-    'title:': true
+  "movie": {
+    "title:": true
   }
 }
+```
 
-// Response
+It will return:
+
+```json
 {
-  movie: 'Inception'
+  "movie": "Inception"
 }
 ```
 
@@ -215,24 +225,26 @@ Object **values** can be either:
 
 When executing a method, it is often useful to pass some parameters. Here's how it works:
 
-```js
-// Request:
+```json
 {
-  movies: {
-    $params: {filter: {year: 2010}},
-    $return: [
+  "movies": {
+    "$params": {"filter": {"year": 2010}},
+    "$return": [
       {
-        title: true
+        "title": true
       }
     ]
   }
 }
+```
 
-// Response:
+It will return:
+
+```json
 {
-  movies: [
+  "movies": [
     {
-      title: 'Inception'
+      "title": "Inception"
     }
   ]
 }
@@ -242,21 +254,21 @@ The keyword `$params` allows to pass parameters to a method and `$return` is the
 
 Note: in the previous examples, we didn't have parameters, so we didn't need to specify the `$return` in our queries, it was implicit.
 
-```js
+```json
 {
-  movies: {
-    count: true;
+  "movies": {
+    "count": true
   }
 }
 ```
 
 is the same as:
 
-```js
+```json
 {
-  movies: {
-    $return: {
-      count: true;
+  "movies": {
+    "$return": {
+      "count": true
     }
   }
 }
@@ -273,40 +285,42 @@ Doing this we can access both method results `actionMovies` and `dramaMovies` in
 
 It's a bit similar to how we can rename variables when objects are destructured in JavaScript ES6.
 
-```js
-// Request:
+```json
 {
-  'movies:actionMovies': {
-    $params: {filter: {genre: 'action'}},
-    $return: [
+  "movies:actionMovies": {
+    "$params": {"filter": {"genre": "action"}},
+    "$return": [
       {
-        title: true
+        "title": true
       }
     ]
   },
-  'movies:dramaMovies': {
-    $params: {filter: {genre: 'drama'}},
-    $return: [
+  "movies:dramaMovies": {
+    "$params": {"filter": {"genre": "drama"}},
+    "$return": [
       {
-        title: true
+        "title": true
       }
     ]
   }
 }
+```
 
-// Response:
+It will return:
+
+```json
 {
-  actionMovies: [
+  "actionMovies": [
     {
-      title: 'Inception'
+      "title": "Inception"
     },
     {
-      title: 'The Matrix'
+      "title": "The Matrix"
     }
   ],
-  dramaMovies: [
+  "dramaMovies": [
     {
-      title: 'Forrest Gump'
+      "title": "Forrest Gump"
     }
   ]
 }
@@ -316,24 +330,23 @@ It's a bit similar to how we can rename variables when objects are destructured 
 
 Now, let's compose a more complicated query involving several chained methods:
 
-```js
-// Request:
+```json
 {
-  movies: {
-    filter: {
-      $params: {country: 'USA'},
-      $return: {
-        sort: {
-          $params: {by: 'year'},
-          $return: {
-            skip: {
-              $params: 5,
-              limit: {
-                $params: 10,
-                $return: [
+  "movies": {
+    "filter": {
+      "$params": {"country": "USA"},
+      "$return": {
+        "sort": {
+          "$params": {"by": "year"},
+          "$return": {
+            "skip": {
+              "$params": 5,
+              "limit": {
+                "$params": 10,
+                "$return": [
                   {
-                    title: true,
-                    year: true
+                    "title": true,
+                    "year": true
                   }
                 ]
               }
@@ -344,21 +357,24 @@ Now, let's compose a more complicated query involving several chained methods:
     }
   }
 }
+```
 
-// Response:
+It will return:
+
+```json
 {
-  movies: {
-    filter: {
-      sort: {
-        skip: {
-          limit: [
+  "movies": {
+    "filter": {
+      "sort": {
+        "skip": {
+          "limit": [
             {
-              title: 'The Matrix',
-              year: 1999
+              "title": "The Matrix",
+              "year": 1999
             },
             {
-              title: 'Inception',
-              year: 2010
+              "title": "Inception",
+              "year": 2010
             }
           ]
         }
@@ -370,23 +386,30 @@ Now, let's compose a more complicated query involving several chained methods:
 
 It works. Doing so allows to chain several methods, but it is not very pretty. Fortunately, there is the keyword `$invoke` which simplifies this type of query:
 
-```js
-// Request:
+```json
 {
-  movies: {
-    $invoke: [{filter: {country: 'USA'}}, {sort: {by: 'year'}}, {skip: 5}, {limit: 10}],
-    $return: [
+  "movies": {
+    "$invoke": [
+      {"filter": {"country": "USA"}},
+      {"sort": {"by": "year"}},
+      {"skip": 5},
+      {"limit": 10}
+    ],
+    "$return": [
       {
-        title: true,
-        year: true
+        "title": true,
+        "year": true
       }
     ]
   }
 }
+```
 
-// Response:
+It will return:
+
+```json
 {
-  movies: [{title: 'The Matrix', year: 1999}, {title: 'Inception', year: 2010}]
+  "movies": [{"title": "The Matrix", "year": 1999}, {"title": "Inception", "year": 2010}]
 }
 ```
 
@@ -397,16 +420,16 @@ It works. Doing so allows to chain several methods, but it is not very pretty. F
 Let's say we have a `reverse` method on our `movies` collection.
 We could write the method like this:
 
-```js
+```json
 {
-  movies: {
-    reverse: {
-      $return: [
+  "movies": {
+    "reverse": {
+      "$return": [
         {
-          title: true,
-          year: true
+          "title": true,
+          "year": true
         }
-      ];
+      ]
     }
   }
 }
@@ -414,24 +437,24 @@ We could write the method like this:
 
 but it would add an extra level in the response:
 
-```js
+```json
 {
-  movies: {
-    reverse: [{title: 'Inception', year: 2010}, {title: 'The Matrix', year: 1999}];
+  "movies": {
+    "reverse": [{"title": "Inception", "year": 2010}, {"title": "The Matrix", "year": 1999}]
   }
 }
 ```
 
 Instead, we can call the `reverse` method using `$invoke` keyword:
 
-```js
+```json
 {
-  movies: {
-    $invoke: 'reverse',
-    $return: [
+  "movies": {
+    "$invoke": "reverse",
+    "$return": [
       {
-        title: true,
-        year: true
+        "title": true,
+        "year": true
       }
     ]
   }
@@ -440,9 +463,9 @@ Instead, we can call the `reverse` method using `$invoke` keyword:
 
 and the response would be a bit less verbose:
 
-```js
+```json
 {
-  movies: [{title: 'Inception', year: 2010}, {title: 'The Matrix', year: 1999}];
+  "movies": [{"title": "Inception", "year": 2010}, {"title": "The Matrix", "year": 1999}]
 }
 ```
 
@@ -454,22 +477,24 @@ So far, we have invoked methods that only read data and don't produce any side e
 
 Here is how we could create a record:
 
-```js
-// Request:
+```json
 {
-  movies: {
-    create: {
-      $params: {title: 'Avatar', country: 'USA'},
-      $return: {id: true}
+  "movies": {
+    "create": {
+      "$params": {"title": "Avatar", "country": "USA"},
+      "$return": {"id": true}
     }
   }
 }
+```
 
-// Response:
+It will return:
+
+```json
 {
-  movies: {
-    create: {
-      id: 'cjrts72gy00ik01rv6eins4se'
+  "movies": {
+    "create": {
+      "id": "cjrts72gy00ik01rv6eins4se"
     }
   }
 }
@@ -481,21 +506,23 @@ Unlike GraphQL, Deepr does not differentiate queries and mutations. So, performi
 
 Now that we have added a record, let's fetch it:
 
-```js
-// Request:
+```json
 {
-  movie: {
-    $params: {id: 'cjrts72gy00ik01rv6eins4se'},
-    $return: {id: true, title: true, country: true}
+  "movie": {
+    "$params": {"id": "cjrts72gy00ik01rv6eins4se"},
+    "$return": {"id": true, "title": true, "country": true}
   }
-};
+}
+```
 
-// Response:
+It will return:
+
+```json
 {
-  movie: {
-    id: 'cjrts72gy00ik01rv6eins4se',
-    title: 'Avatar',
-    country: 'USA'
+  "movie": {
+    "id": "cjrts72gy00ik01rv6eins4se",
+    "title": "Avatar",
+    "country": "USA"
   }
 }
 ```
@@ -504,25 +531,27 @@ Now that we have added a record, let's fetch it:
 
 To modify a record, we could do so:
 
-```js
-// Request:
+```json
 {
-  movie: {
-    $params: {id: 'cjrts72gy00ik01rv6eins4se'},
-    $return: {
-      update: {
-        $params: {rating: 8.1},
-        $return: {id: true}
+  "movie": {
+    "$params": {"id": "cjrts72gy00ik01rv6eins4se"},
+    "$return": {
+      "update": {
+        "$params": {"rating": 8.1},
+        "$return": {"id": true}
       }
     }
   }
 }
+```
 
-// Response:
+It will return:
+
+```json
 {
-  movie: {
-    update: {
-      id: 'cjrts72gy00ik01rv6eins4se'
+  "movie": {
+    "update": {
+      "id": "cjrts72gy00ik01rv6eins4se"
     }
   }
 }
@@ -532,26 +561,28 @@ To modify a record, we could do so:
 
 Finally, here is how we could delete a record:
 
-```js
-// Request:
+```json
 {
-  movie: {
-    $params: {id: 'cjrts72gy00ik01rv6eins4se'},
-    $return: {
-      delete: {
-        id: true,
-        hasBeenDeleted: true
+  "movie": {
+    "$params": {"id": "cjrts72gy00ik01rv6eins4se"},
+    "$return": {
+      "delete": {
+        "id": true,
+        "hasBeenDeleted": true
       }
     }
   }
 }
+```
 
-// Response:
+It will return:
+
+```json
 {
-  movie: {
-    delete: {
-      id: 'cjrts72gy00ik01rv6eins4se',
-      hasBeenDeleted: true
+  "movie": {
+    "delete": {
+      "id": "cjrts72gy00ik01rv6eins4se",
+      "hasBeenDeleted": true
     }
   }
 }
@@ -563,55 +594,57 @@ This guide would not be complete without mentioning another important feature su
 
 It's actually pretty straightforward. Here's how we could fetch some movies with their related actors:
 
-```js
-// Request:
+```json
 {
-  movies: {
-    $params: {filter: {country: 'USA'}},
-    $return: {
-      title: true,
-      year: true,
-      actors: {
-        $params: {sort: {by: 'popularity'}, limit: 2},
-        $return: [
+  "movies": {
+    "$params": {"filter": {"country": "USA"}},
+    "$return": {
+      "title": true,
+      "year": true,
+      "actors": {
+        "$params": {"sort": {"by": "popularity"}, "limit": 2},
+        "$return": [
           {
-            fullName: true,
-            photoURL: true
+            "fullName": true,
+            "photoURL": true
           }
         ]
       }
     }
   }
 }
+```
 
-// Response:
+It will return:
+
+```json
 {
-  movies: [
+  "movies": [
     {
-      title: 'Inception',
-      year: 2010,
-      actors: [
+      "title": "Inception",
+      "year": 2010,
+      "actors": [
         {
-          fullName: 'Leonardo DiCaprio',
-          photoURL: 'https://www.imdb.com/name/nm0000138/mediaviewer/rm487490304'
+          "fullName": "Leonardo DiCaprio",
+          "photoURL": "https://www.imdb.com/name/nm0000138/mediaviewer/rm487490304"
         },
         {
-          fullName: 'Joseph Gordon-Levitt',
-          photoURL: 'https://www.imdb.com/name/nm0330687/mediaviewer/rm1175888384'
+          "fullName": "Joseph Gordon-Levitt",
+          "photoURL": "https://www.imdb.com/name/nm0330687/mediaviewer/rm1175888384"
         }
       ]
     },
     {
-      title: 'The Matrix',
-      year: 1999,
-      actors: [
+      "title": "The Matrix",
+      "year": 1999,
+      "actors": [
         {
-          fullName: 'Keanu Reeves',
-          photoURL: 'https://www.imdb.com/name/nm0000206/mediaviewer/rm3751520256'
+          "fullName": "Keanu Reeves",
+          "photoURL": "https://www.imdb.com/name/nm0000206/mediaviewer/rm3751520256"
         },
         {
-          fullName: 'Laurence Fishburne',
-          photoURL: 'https://www.imdb.com/name/nm0000401/mediaviewer/rm1925683200'
+          "fullName": "Laurence Fishburne",
+          "photoURL": "https://www.imdb.com/name/nm0000401/mediaviewer/rm1925683200"
         }
       ]
     }
