@@ -110,9 +110,7 @@ Now, you might ask yourself, how to reach the elements of the `movies` collectio
 }
 ```
 
-By embedding the query object in an array, we specify that the context of the query is the **elements** of the collection rather than the collection itself.
-
-It will return:
+By embedding the query object in an array, we specify that the context of the query is the **elements** of the collection rather than the collection itself and we get the following response:
 
 ```json
 {
@@ -145,9 +143,7 @@ Now, let's see how to query both a collection and its elements:
 }
 ```
 
-[TODO: briefly explain `=>items`]
-
-It will return:
+Using the key `"=>items"` means that we take the current context (the collection of movies) and we put it under a new key called `items`, in the response. As a result, we get the following response:
 
 ```json
 {
@@ -174,7 +170,7 @@ When executing a method, it is often useful to pass some parameters. Here's how 
 ```json
 {
   "movies": {
-    "()": {"filter": {"year": 2010}},
+    "()": {"filter": {"year": 2010}, "limit": 1},
     "=>": [
       {
         "title": true
@@ -184,9 +180,11 @@ When executing a method, it is often useful to pass some parameters. Here's how 
 }
 ```
 
-[TODO: explain `()` and briefly explain `=>`]
+Say the `movies` method takes a single argument: an object that includes a key called `filter` used to specify the query search criteria and a key called `limit`.
 
-It will return:
+The `()` key allows us to pass all parameters, while `=>` is used to define what to do with the result of the function call.
+
+As in a previous example, we are using the array bracket `[]` to process the collection elements, in order to produce the following response:
 
 ```json
 {
@@ -198,74 +196,44 @@ It will return:
 }
 ```
 
-### Key-value nodes [TODO]
+### Key-value nodes
 
-#### `"key"`
+We have seen previously some examples involving the arrow symbol `=>`, let's enter into the details to understand how to write the keys and the values of the nested nodes.
 
-#### `"sourceKey=>targetKey"`
-
-#### `"=>targetKey"`
-
-#### `"sourceKey=>"`
-
-#### `"=>"`
-
-Object **keys** are made of 2 parts, a "source" and a "target", separated by an arrow symbol (`=>`).
+Object **keys** are made of 2 parts, a "source" and a "target", separated by the arrow symbol (`=>`).
 
 - The "source" is the method or the field name, evaluated in the current context.
-- You can think about the `target` as a way to create aliases, a way to rename things in the query response (similar to [GraphQL aliases](https://graphql.org/learn/queries/#aliases))
+- The "target" is the place where to put the result of the evaluation in the response.
 
-For example `createdAt=>date` key means the `createdAt` field (or method) result will appear under a key called `date` in the response.
+Source, target, or both can be omitted, producing slightly different results. Let's check the 4 available variants.
 
-If there is no arrow symbol it means that source and target are the same, it's the most frequent use-case, when the response structure mirrors the query structure.
+#### 1. `"key"` variant
 
-If the source is omitted, it means the current context will be re-used in the response as it is, without any processing.
+If there is no arrow symbol it means that source and target are the same.
 
-For example, `=>items` means we take the current context and put it inside an object whose key is `items`. Basically we are nesting the current context one level deeper, under a new key.
-
-We did that in the previous example because we wanted to access our array of movies under a new key called `items`, while adding a `count` property to the `movies` object.
-
-If the target is omitted, it means that the evaluation of the method or the field does not generate a new object.
-
-For example, note how the key `title` is absent from the response, because we use the key `"title=>"` instead of `"title"`:
+It's the most frequent use-case, when the response structure mirrors exactly the query structure.
 
 ```json
 {
   "movie": {
-    "title=>": true
+    "title": true
   }
 }
 ```
 
-It will return:
+Note: the key `title` could be expressed by `title=>title`, it would work too.
 
-```json
-{
-  "movie": "Inception"
-}
-```
+#### 2. `"sourceKey=>targetKey"` variant
 
-#### Object value syntax [TODO]
+If we specify 2 different source and target, the result of the evaluation of `sourceKey` will appear below a key called `targetKey` in the response.
 
-[TODO: Add examples]
+For example `createdAt=>date` key means the `createdAt` field (or method) result will appear under a key called `date` in the response.
 
-Object **values** can be either:
-
-- The boolean `true`: the result of the method or the field will be included in the response, following the format defined in the key (see above).
-- An object: the execution will continue recursively, applying every key to the parent context.
-- An array containing a single object: when the parent context is a collection of elements, every element will be processed by the single object, in a way that is similar to a `map()` applied to an array.
-
-### Aliases
-
-[TODO: move to the key-value node explanation]
+In this case, you can think about the `target` as a way to create aliases, a way to rename things in the query response (similar to [GraphQL aliases](https://graphql.org/learn/queries/#aliases)).
 
 By using aliases, it is possible to execute a method several times with different parameters, avoiding conflict names inside the current context.
 
 For example, in the following request, we first call `movies` method and assign the result to `actionMovies`. Then, we call the same `movies` method, with different parameters, and assign the result to `dramaMovies`.
-
-Doing this we can access both method results `actionMovies` and `dramaMovies` in the query response.
-
-It's a bit similar to how we can rename variables when objects are destructured in JavaScript ES6.
 
 ```json
 {
@@ -288,7 +256,7 @@ It's a bit similar to how we can rename variables when objects are destructured 
 }
 ```
 
-It will return:
+Doing this we can access both method results `actionMovies` and `dramaMovies` in the query response, like this:
 
 ```json
 {
@@ -305,6 +273,158 @@ It will return:
       "title": "Forrest Gump"
     }
   ]
+}
+```
+
+#### 3. `"=>targetKey"` variant
+
+If the source is omitted, it means the current context will be re-used in the response as it is, without any processing.
+
+For example, `=>items` means we take the current context and put it inside an object whose key is `items`. Basically we are nesting the current context one level deeper, under a new key.
+
+We did that in the previous example because we wanted to access our array of movies under a new key called `items`, while adding a `count` property to the `movies` object.
+
+#### 4. `"sourceKey=>"` variant
+
+If the target is omitted, it means that the evaluation of the method or the field does not generate a new object.
+
+For example, if we are only interested in the title of the movie we found, we could do that:
+
+```json
+{
+  "movie": {
+    "title=>": true
+  }
+}
+```
+
+Note how the key `title` is absent from the response, because we use the key `"title=>"` instead of `"title"`:
+
+```json
+{
+  "movie": "Inception"
+}
+```
+
+#### `"=>"` variant
+
+Lastly, we can remove both the source and the target from the key expression, leaving alone the arrow symbol `=>`.
+
+In this case, we don't process the current context (no source) and we are not creating new keys in the response (no target).
+
+The `=>` can be interpreted as a way to introduce the result of a function call.
+
+In the following query, we retrieve a movie by its `id` and we return `title` and `year` attributes in the response.
+
+```json
+{
+  "movie": {
+    "()": {"id": "cjrts72gy00ik01rv6eins4se"},
+    "=>": {"title": true, "year": true}
+  }
+}
+```
+
+Note: the following query is exactly the same.
+
+```json
+{
+  "movie": {
+    "()": {"id": "cjrts72gy00ik01rv6eins4se"},
+    "title": true,
+    "year": true
+  }
+}
+```
+
+Both queries will produce the following response:
+
+```json
+{
+  "movie": {
+    "title": "Inception",
+    "year": 2010
+  }
+}
+```
+
+### Query execution process
+
+Query objects are evaluated in a recursive way, for every key the related node can be either:
+
+- The boolean `true`
+- An object
+- An array
+
+Let's see how Deepr handles these 3 types of node.
+
+#### Boolean `true`
+
+The boolean `true` means the result of the method or the field will be included in the response, following the format defined in the key (see above).
+
+If we query a single movie this way:
+
+```json
+{
+  "movie": {
+    "title": true,
+    "year": true
+  }
+}
+```
+
+We get a response whose shape mirrors the query's one:
+
+```json
+{
+  "movie": {
+    "title": "Inception",
+    "year": 2010
+  }
+}
+```
+
+#### Object
+
+When an object is found, the execution will continue recursively, applying every key to the parent context.
+
+```json
+{
+  "movie": {
+    "director": {
+      "name": true
+    }
+  }
+}
+```
+
+Once again, the response shape mirrors the query's one:
+
+```json
+{
+  "movie": {
+    "director": {
+      "name": "Georges Lucas"
+    }
+  }
+}
+```
+
+#### Array
+
+When the parent context is a collection of elements, if an array with a single object is found, every element will be processed by the single object, in a way that is similar to a `map()` applied to an array.
+
+```json
+{
+  "movies": [{"title": true}]
+}
+```
+
+We can see the response as the result of a `map` function:
+
+```json
+{
+  "movies": [{"title": "Inception"}, {"title": "The Matrix"}]
 }
 ```
 
@@ -420,7 +540,7 @@ To modify a record, we could do so:
 }
 ```
 
-It will return:
+Note how we use the key `"update=>"` instead of `"update"`, as explained the `"sourceKey=>"` section, to avoid creating an un-necessary "update" key in the response:
 
 ```json
 {
@@ -443,7 +563,7 @@ Finally, here is how we could delete a record:
 }
 ```
 
-It will return:
+Again, using the `"sourceKey=>"` form will produce the following result:
 
 ```json
 {
