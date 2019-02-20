@@ -6,7 +6,7 @@ A specification for invoking remote methods, deeply!
 
 [GraphQL](https://graphql.org/) brought a powerful idea — the ability to invoke multiple methods in a single call, and more importantly, the ability to invoke methods based on the result of other methods. However, we feel that the design of GraphQL is not quite right. Some crucial features are missing and some features should be removed or implemented at another layer of the stack.
 
-First of all, with GraphQL, it is not possible to invoke methods on collections. When we specify a query for a collection, it is executed on the elements of the collection, and not on the collection itself. It would be nice if we could differentiate the two contexts. For example, depending on the schema, this query might not return the expected result:
+First of all, with GraphQL, it is not possible to invoke methods on collections. When we specify a query for a collection, it is executed on the elements of the collection, and not on the collection itself. It would be nice if we could access the two contexts separately. For example, depending on the schema, this query might not return the expected result:
 
 ```graphql
 {
@@ -31,9 +31,9 @@ Another issue is the GraphQL execution model. Having queries executed in paralle
 }
 ```
 
-Parallelizing the execution of the requests is an optimization matter, and we believe it should better be addressed at another layer of the backend stack.
+Parallelizing the execution of the requests is an optimization matter, and we believe it should better be addressed at another layer of the stack.
 
-Then, there is the way the execution is handled. With GraphQL, it is required to implement resolvers for each operation. This resolver layer seems a little cumbersome to us. When the business layer is implemented in an object-oriented way, why not just directly invoke the methods of the objects? Some would say it is good practice to add an API layer on top of the business layer. Well, it's debatable, but in any case, we believe that the query execution should not require an additional layer. If the developer wants to add an API layer, it's up to him to do so.
+Then, there is the way the execution is handled. With GraphQL, it is required to implement resolvers for each operation. This resolver layer seems a little cumbersome to us. When the business layer is implemented in an object-oriented way, why not just directly invoke the methods of the objects? Some would say it is good practice to add an API layer on top of the business layer. Well, it's debatable, but in any case, we believe that the query execution should not require an additional layer. If the developers want to add an API layer, it's up to them to do so.
 
 Another point is the type system. Providing schemas and types is certainly an important feature, but we believe it should not be included in the core of the language. A fine type system (such as those provided by TypeScript or Flow) should be optional and implemented orthogonally as an extension. Or even better, if types are specified deeper in the backend stack (i.e., in the business layer), an additional type system may not be necessary.
 
@@ -49,10 +49,6 @@ Deepr does not specify the use of a particular language. So, although the follow
 
 ### Simple queries
 
-Here is the gist: queries are plain objects, made of nested key-value nodes.
-
-Besides the special key `=>`, every node key is the name (with some refinements that will be explained later) of either an **attribute** or a **method** that will be called in the **context** of the parent node.
-
 Let's start with a simple query:
 
 ```json
@@ -64,7 +60,11 @@ Let's start with a simple query:
 }
 ```
 
-It will return:
+Here we are invoking a method called `movie` in the top-level context (the "root").
+
+Then, inside the context of `movie`, we are calling `title` and `year` attributes.
+
+The response will be:
 
 ```json
 {
@@ -72,12 +72,8 @@ It will return:
     "title": "Inception",
     "year": 2010
   }
-};
+}
 ```
-
-Here we are calling a method called `movie` in the top-level context (the "root").
-
-Then, inside the context of `movie`, we are returning `title` and `year` attributes.
 
 So far, it looks like GraphQL. The only significant difference is, since we use JSON objects, we must specify a value for the keys `title` and `year`. Specifying `true` means that we want to return or invoke the corresponding field or method.
 
@@ -91,7 +87,7 @@ Instead of querying a single movie, let's query a collection of movies:
 }
 ```
 
-It will return:
+Nothing surprising here, we're just executing the `count` method on the `movies` collection. It will return:
 
 ```json
 {
@@ -100,8 +96,6 @@ It will return:
   }
 }
 ```
-
-Nothing surprising here, we're just executing the `count` method on the `movies` collection.
 
 Now, you might ask yourself, how to reach the elements of the `movies` collection? That's easy:
 
@@ -115,6 +109,8 @@ Now, you might ask yourself, how to reach the elements of the `movies` collectio
   ]
 }
 ```
+
+By embedding the query object in an array, we specify that the context of the query is the **elements** of the collection rather than the collection itself.
 
 It will return:
 
@@ -133,8 +129,6 @@ It will return:
 }
 ```
 
-By embedding a query in an array, we specify that the context of the query is the **elements** of the collection rather than the collection itself.
-
 Now, let's see how to query both a collection and its elements:
 
 ```json
@@ -150,6 +144,8 @@ Now, let's see how to query both a collection and its elements:
   }
 }
 ```
+
+[TODO: briefly explain `=>items`]
 
 It will return:
 
@@ -171,11 +167,48 @@ It will return:
 }
 ```
 
-This example introduces the full syntax of the objects keys, that we will explain in the following section. [TOFIX]
+### Parameters
 
-### Key-value full syntax
+When executing a method, it is often useful to pass some parameters. Here's how it works:
 
-#### `'source=>target'` key syntax
+```json
+{
+  "movies": {
+    "()": {"filter": {"year": 2010}},
+    "=>": [
+      {
+        "title": true
+      }
+    ]
+  }
+}
+```
+
+[TODO: explain `()` and briefly explain `=>`]
+
+It will return:
+
+```json
+{
+  "movies": [
+    {
+      "title": "Inception"
+    }
+  ]
+}
+```
+
+### Key-value nodes [TODO]
+
+#### `"key"`
+
+#### `"sourceKey=>targetKey"`
+
+#### `"=>targetKey"`
+
+#### `"sourceKey=>"`
+
+#### `"=>"`
 
 Object **keys** are made of 2 parts, a "source" and a "target", separated by an arrow symbol (`=>`).
 
@@ -212,7 +245,9 @@ It will return:
 }
 ```
 
-#### Object value syntax
+#### Object value syntax [TODO]
+
+[TODO: Add examples]
 
 Object **values** can be either:
 
@@ -220,38 +255,11 @@ Object **values** can be either:
 - An object: the execution will continue recursively, applying every key to the parent context.
 - An array containing a single object: when the parent context is a collection of elements, every element will be processed by the single object, in a way that is similar to a `map()` applied to an array.
 
-### Parameters
-
-When executing a method, it is often useful to pass some parameters. Here's how it works:
-
-```json
-{
-  "movies": {
-    "()": {"filter": {"year": 2010}},
-    "=>": [
-      {
-        "title": true
-      }
-    ]
-  }
-}
-```
-
-It will return:
-
-```json
-{
-  "movies": [
-    {
-      "title": "Inception"
-    }
-  ]
-}
-```
-
 ### Aliases
 
-By using _aliases_, it is possible to execute a method several times with different parameters, avoiding conflict names inside the current context.
+[TODO: move to the key-value node explanation]
+
+By using aliases, it is possible to execute a method several times with different parameters, avoiding conflict names inside the current context.
 
 For example, in the following request, we first call `movies` method and assign the result to `actionMovies`. Then, we call the same `movies` method, with different parameters, and assign the result to `dramaMovies`.
 
@@ -363,7 +371,9 @@ Here is how we could create a record:
 }
 ```
 
-It will return:
+Unlike GraphQL, Deepr does not differentiate queries and mutations. So, performing a mutation is just a matter of calling the right method.
+
+It will simply return:
 
 ```json
 {
@@ -372,8 +382,6 @@ It will return:
   }
 }
 ```
-
-Unlike GraphQL, Deepr does not differentiate queries and mutations. So, performing a mutation is just a matter of calling the right method.
 
 #### Read
 
