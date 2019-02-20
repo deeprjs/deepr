@@ -110,7 +110,9 @@ Now, you might ask yourself, how to reach the elements of the `movies` collectio
 }
 ```
 
-By embedding the query object in an array, we specify that the context of the query is the **elements** of the collection rather than the collection itself and we get the following response:
+By embedding the query object in an array, we specify that the context of the query is the **elements** of the collection rather than the collection itself.
+
+We get the following response:
 
 ```json
 {
@@ -143,7 +145,7 @@ Now, let's see how to query both a collection and its elements:
 }
 ```
 
-Using the key `"=>items"` means that we take the current context (the collection of movies) and we put it under a new key called `items`, in the response. As a result, we get the following response:
+Using the key `"=>items"` means that we take the current context (the collection of movies) and we put it under a new key called `items`, in the response. As a result, we get the following:
 
 ```json
 {
@@ -182,9 +184,11 @@ When executing a method, it is often useful to pass some parameters. Here's how 
 
 Say the `movies` method takes a single argument: an object that includes a key called `filter` used to specify the query search criteria and a key called `limit`.
 
-The `()` key allows us to pass all parameters, while `=>` is used to define what to do with the result of the function call.
+The `()` key allows us to pass all parameters, while `=>` is used to define what to do with the result of the method call.
 
-As in a previous example, we are using the array bracket `[]` to process the collection elements, in order to produce the following response:
+As in a previous example, we are using the array bracket `[]` to process the collection elements.
+
+We get the following results:
 
 ```json
 {
@@ -200,12 +204,12 @@ As in a previous example, we are using the array bracket `[]` to process the col
 
 We have seen previously some examples involving the arrow symbol `=>`, let's enter into the details to understand how to write the keys and the values of the nested nodes.
 
-Object **keys** are made of 2 parts, a "source" and a "target", separated by the arrow symbol (`=>`).
+Object **keys** are made of two parts, a "source" and a "target", separated by the arrow symbol (`=>`).
 
 - The "source" is the method or the field name, evaluated in the current context.
 - The "target" is the place where to put the result of the evaluation in the response.
 
-Source, target, or both can be omitted, producing slightly different results. Let's check the 4 available variants.
+Source, target, or both can be omitted, producing slightly different results. Let's check the five available variants.
 
 #### 1. `"key"` variant
 
@@ -225,15 +229,15 @@ Note: the key `title` could be expressed by `title=>title`, it would work too.
 
 #### 2. `"sourceKey=>targetKey"` variant
 
-If we specify 2 different source and target, the result of the evaluation of `sourceKey` will appear below a key called `targetKey` in the response.
+If source and target are different, the result of the evaluation of `sourceKey` will appear under a key called `targetKey` in the response.
 
 For example `createdAt=>date` key means the `createdAt` field (or method) result will appear under a key called `date` in the response.
 
 In this case, you can think about the `target` as a way to create aliases, a way to rename things in the query response (similar to [GraphQL aliases](https://graphql.org/learn/queries/#aliases)).
 
-By using aliases, it is possible to execute a method several times with different parameters, avoiding conflict names inside the current context.
+By using aliases, it is possible to execute a method several times with different parameters, avoiding name collisions inside the result.
 
-For example, in the following request, we first call `movies` method and assign the result to `actionMovies`. Then, we call the same `movies` method, with different parameters, and assign the result to `dramaMovies`.
+For example, in the following query, we first call `movies` method and assign the result to `actionMovies`. Then, we call the same `movies` method, with different parameters, and assign the result to `dramaMovies`.
 
 ```json
 {
@@ -280,9 +284,38 @@ Doing this we can access both method results `actionMovies` and `dramaMovies` in
 
 If the source is omitted, it means the current context will be re-used in the response as it is, without any processing.
 
-For example, `=>items` means we take the current context and put it inside an object whose key is `items`. Basically we are nesting the current context one level deeper, under a new key.
+For example, in the following query, `=>items` means we take the current context and put it inside an object whose key is `items`. Basically we are nesting the current context one level deeper, under a new key.
 
-We did that in the previous example because we wanted to access our array of movies under a new key called `items`, while adding a `count` property to the `movies` object.
+```json
+{
+  "movies": {
+    "count": true,
+    "=>items": [
+      {
+        "title": true
+      }
+    ]
+  }
+}
+```
+
+Doing this, we can access the array of movies under a new key called `items`, while adding a `count` property to the `movies` object:
+
+```json
+{
+  "movies": {
+    "count": 2,
+    "items": [
+      {
+        "title": "Inception"
+      },
+      {
+        "title": "The Matrix"
+      }
+    ]
+  }
+}
+```
 
 #### 4. `"sourceKey=>"` variant
 
@@ -298,7 +331,7 @@ For example, if we are only interested in the title of the movie we found, we co
 }
 ```
 
-Note how the key `title` is absent from the response, because we use the key `"title=>"` instead of `"title"`:
+Because we use the key `"title=>"` instead of `"title"`, the key `title` is absent from the response:
 
 ```json
 {
@@ -306,7 +339,7 @@ Note how the key `title` is absent from the response, because we use the key `"t
 }
 ```
 
-#### `"=>"` variant
+#### 5. `"=>"` variant
 
 Lastly, we can remove both the source and the target from the key expression, leaving alone the arrow symbol `=>`.
 
@@ -348,7 +381,7 @@ Both queries will produce the following response:
 }
 ```
 
-### Query execution process
+### Query execution
 
 Query objects are evaluated in a recursive way, for every key the related node can be either:
 
@@ -356,7 +389,7 @@ Query objects are evaluated in a recursive way, for every key the related node c
 - An object
 - An array
 
-Let's see how Deepr handles these 3 types of node.
+Let's see how Deepr handles these three types of node.
 
 #### Boolean `true`
 
@@ -386,7 +419,7 @@ We get a response whose shape mirrors the query's one:
 
 #### Object
 
-When an object is found, the execution will continue recursively, applying every key to the parent context.
+When an object is found, the execution will continue recursively, applying every key to the current context.
 
 ```json
 {
@@ -412,7 +445,7 @@ Once again, the response shape mirrors the query's one:
 
 #### Array
 
-When the parent context is a collection of elements, if an array with a single object is found, every element will be processed by the single object, in a way that is similar to a `map()` applied to an array.
+The array type allows to access the elements of a collection. For example:
 
 ```json
 {
@@ -420,7 +453,7 @@ When the parent context is a collection of elements, if an array with a single o
 }
 ```
 
-We can see the response as the result of a `map` function:
+Will return:
 
 ```json
 {
@@ -540,7 +573,7 @@ To modify a record, we could do so:
 }
 ```
 
-Note how we use the key `"update=>"` instead of `"update"`, as explained the `"sourceKey=>"` section, to avoid creating an un-necessary "update" key in the response:
+Note how we use the key `"update=>"` instead of `"update"`. As explained before, to avoid creating an unnecessary `"update"` key in the response:
 
 ```json
 {
@@ -563,7 +596,7 @@ Finally, here is how we could delete a record:
 }
 ```
 
-Again, using the `"sourceKey=>"` form will produce the following result:
+It will produce the following result:
 
 ```json
 {
