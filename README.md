@@ -490,6 +490,33 @@ Will return:
 }
 ```
 
+### Fault-tolerant queries
+
+If you add an exclamation mark (`?`) after the name of a key, then there will be no error thrown in case a field or a method is missing during the execution of a query.
+
+For example, the following query will succeed even if the movie has no director:
+
+```json
+{
+  "movie": {
+    "title": true,
+    "director?": {
+      "fullName": true
+    }
+  }
+}
+```
+
+Rather than throwing an error, it will just return:
+
+```json
+{
+  "movie": {
+    "title": "Inception"
+  }
+}
+```
+
 ### Chained queries
 
 Now, let's put into practice what we've just seen to compose a more complex query:
