@@ -37,9 +37,9 @@ Then, there is the way the execution is handled. With GraphQL, it is required to
 
 Another point is the type system. Providing schemas and types is certainly an important feature, but we believe it should not be included in the core specifications. A fine type system (such as those provided by TypeScript or Flow) should be optional and implemented orthogonally as an extension. Or even better, if types are specified deeper in the backend stack (i.e., in the business layer), an additional type system may not be necessary.
 
-Finally, let's question the very nature of GraphQL: the fact that it is language. Indeed, do we need another language? The GraphQL language makes queries prettier, but is it worth it? Adding a new language to the stack is no small matter, it brings a whole new world that must be connected — both on the frontend and backend sides — to an actual programming language. As a result, everything gets more complicated.
+Finally, let's question the very nature of GraphQL: the fact that it is a language. Indeed, do we need another language? The GraphQL language makes queries prettier, but is it worth it? Adding a new language to the stack is no small matter, it brings a whole new world that must be connected — both on the frontend and backend sides — to an actual programming language. As a result, everything gets more complicated.
 
-All this leads us to think that GraphQL is not a valid solution. We love the main idea though. The ability to compose method calls is fantastic. So we wrote the minimum viable specifications to do precisely that.
+We love the main idea behind GraphQL, and especially the ability to compose method calls. But we think there may be a better way to achieve this goal. That's why we wrote Deepr.
 
 ## Guide
 
@@ -196,7 +196,7 @@ We get the following result:
 }
 ```
 
-### Object keys
+### Keys
 
 We have seen previously some examples involving the arrow symbol `=>`, let's enter into the details of this powerful feature.
 
@@ -207,7 +207,7 @@ Object keys are made of two parts, a "source" and a "target", separated by an ar
 
 Source, target, or both can be omitted, producing slightly different results. Let's check the five possible variants.
 
-#### 1. `"key"` variant
+#### `"key"` variant
 
 If there is no arrow symbol it means that source and target are the same.
 
@@ -233,7 +233,7 @@ Not surprisingly, it will return something like that:
 }
 ```
 
-#### 2. `"sourceKey=>targetKey"` variant
+#### `"sourceKey=>targetKey"` variant
 
 If source and target are different, the result of the evaluation of `sourceKey` will appear under a key called `targetKey` in the response.
 
@@ -286,7 +286,7 @@ Doing this we get both `actionMovies` and `dramaMovies` results in the response,
 }
 ```
 
-#### 3. `"=>targetKey"` variant
+#### `"=>targetKey"` variant
 
 If the source is omitted, it means the current context will be re-used in the response as it is, without any processing.
 
@@ -323,7 +323,7 @@ Doing this, we can query both a collection and its elements to produce results s
 }
 ```
 
-#### 4. `"sourceKey=>"` variant
+#### `"sourceKey=>"` variant
 
 If the target is omitted, it means that the evaluation of a method (or field) does not generate a new object.
 
@@ -345,7 +345,7 @@ Because we use the key `"title=>"` instead of `"title"`, the key `title` is abse
 }
 ```
 
-#### 5. `"=>"` variant
+#### `"=>"` variant
 
 Lastly, we can remove both the source and the target from the key expression, leaving alone the arrow symbol `=>`.
 
@@ -410,7 +410,7 @@ Will output:
 }
 ```
 
-### Query execution
+### Values
 
 Query objects are evaluated in a recursive way, and for every key the related value can be either:
 
@@ -418,7 +418,7 @@ Query objects are evaluated in a recursive way, and for every key the related va
 - An object
 - An array
 
-Let's see how Deepr handles these three kinds of value.
+Let's see how Deepr handles these three types of value.
 
 #### Boolean `true`
 
@@ -713,7 +713,7 @@ TODO
 
 ## Specifications
 
-Although pretty stable, Deepr is a work in progress, and formal specifications remain to be written.
+Although pretty stable, Deepr is a work in progress, and formal specifications still have to written.
 
 ## License
 
