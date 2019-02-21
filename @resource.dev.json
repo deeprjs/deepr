@@ -1,4 +1,19 @@
 {
+  "install": {
+    "@type": "method",
+    "@run": [
+      "(@import shell/bash) run \"git config core.hooksPath .githooks\"",
+      "./packages/runtime @install"
+    ],
+    "@listen": "@install"
+  },
+  "build": {
+    "@type": "method",
+    "@run": [
+      "./packages/runtime @build"
+    ],
+    "@listen": "@build"
+  },
   "lint": {
     "@type": "method",
     "@run": [

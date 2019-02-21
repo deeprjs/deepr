@@ -1,0 +1,15 @@
+{
+  "@import": "medmain/npm-package#^0.1.0",
+  "name": "@deepr/runtime",
+  "version": "0.1.0",
+  "description": "Simple Deepr runtime",
+  "dependencies": {
+    "lodash": "^4.17.10"
+  },
+  "@unpublishable": {
+    "tests": {
+      "@import": "1place/jest#^0.1.0",
+      "@directory": "./tests"
+    }
+  }
+}
