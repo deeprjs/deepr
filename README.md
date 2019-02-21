@@ -4,9 +4,9 @@ A specification for invoking remote methods, deeply!
 
 ## Why?
 
-[GraphQL](https://graphql.org/) brought a powerful idea — the ability to invoke multiple methods in a single call, and more importantly, the ability to invoke methods based on the result of other methods. However, we feel that the design of GraphQL is not quite right. Some crucial features are missing and some features should be removed or implemented at another layer of the stack.
+[GraphQL](https://graphql.org/) brought a powerful idea — the ability to invoke multiple methods in a single call, and more importantly, the ability to invoke methods based on the result of other methods. However, we feel that the design of GraphQL is not quite right. Some crucial points are missing and some features should be removed or implemented at another layer of the stack.
 
-First of all, with GraphQL, it is not possible to invoke methods on collections. When we specify a query for a collection, it is executed on the elements of the collection, and not on the collection itself. It would be nice if we could access the two contexts separately. For example, depending on the schema, this query might not return the expected result:
+First of all, with GraphQL it is not possible to invoke methods on collections. When we specify a query for a collection, it is executed on the elements of the collection, and not on the collection itself. It would be nice if we could access the two contexts separately. For example, depending on the schema, this query might not return the expected result:
 
 ```graphql
 {
@@ -33,17 +33,17 @@ Another issue is the GraphQL execution model. Having queries executed in paralle
 
 Parallelizing the execution of the requests is an optimization matter, and we believe it should better be addressed at another layer of the stack.
 
-Then, there is the way the execution is handled. With GraphQL, it is required to implement resolvers for each operation. This resolver layer seems a little cumbersome to us. When the business layer is implemented in an object-oriented way, why not just directly invoke the methods of the objects? Some would say it is good practice to add an API layer on top of the business layer. Well, it's debatable, but in any case, we believe that the query execution should not require an additional layer. If the developers want to add an API layer, it's up to them to do so.
+Then, there is the way the execution is handled. With GraphQL, it is required to implement resolvers for each operation. This resolver layer seems a little cumbersome to us. When the business layer is implemented in an object-oriented way, why not just directly invoke the methods of the objects? Some would say it is good practice to add an API layer on top of the business layer. Well, we can agree with that. But in any case, we believe that the query execution should not require an additional layer. If the developers want to add an API layer, it's up to them to do so.
 
-Another point is the type system. Providing schemas and types is certainly an important feature, but we believe it should not be included in the core of the language. A fine type system (such as those provided by TypeScript or Flow) should be optional and implemented orthogonally as an extension. Or even better, if types are specified deeper in the backend stack (i.e., in the business layer), an additional type system may not be necessary.
+Another point is the type system. Providing schemas and types is certainly an important feature, but we believe it should not be included in the core specifications. A fine type system (such as those provided by TypeScript or Flow) should be optional and implemented orthogonally as an extension. Or even better, if types are specified deeper in the backend stack (i.e., in the business layer), an additional type system may not be necessary.
 
-Finally, let's question the very nature of GraphQL: the language. Indeed, do we need another language? The GraphQL language makes queries prettier, but is it worth it? Adding a new language to the stack is no small matter, it brings a whole new world that must be connected — both on the client and server sides — to an actual programming language. As a result, everything gets more complicated.
+Finally, let's question the very nature of GraphQL: the fact that it is language. Indeed, do we need another language? The GraphQL language makes queries prettier, but is it worth it? Adding a new language to the stack is no small matter, it brings a whole new world that must be connected — both on the frontend and backend sides — to an actual programming language. As a result, everything gets more complicated.
 
 All this leads us to think that GraphQL is not a valid solution. We love the main idea though. The ability to compose method calls is fantastic. So we wrote the minimum viable specifications to do precisely that.
 
 ## Guide
 
-Deepr does not specify the use of a particular language. So, although the following examples are written in JSON, keep in mind that they could be written in any language.
+Deepr does not specify the use of a particular language. So, although the following examples are written in JSON, keep in mind that any language could be used.
 
 > Note: To fully appreciate this guide, it is recommended to have a minimum knowledge of [GraphQL](https://graphql.org/).
 
@@ -110,9 +110,7 @@ Now, you might ask yourself, how to reach the elements of the `movies` collectio
 }
 ```
 
-By embedding the query object in an array, we specify that the context of the query is the **elements** of the collection rather than the collection itself.
-
-We get the following response:
+By embedding the query object in an array, we specify that the context of the query is the **elements** of the collection rather than the collection itself. As expected, we get the following response:
 
 ```json
 {
@@ -145,7 +143,7 @@ Now, let's see how to query both a collection and its elements:
 }
 ```
 
-Using the key `"=>items"` means that we take the current context (the collection of movies) and we put it under a new key called `items`, in the response. As a result, we get the following:
+Using the key `"=>items"` means that we take the current context (the collection of movies) and we put it under a new key called `items`. As a result, we get the following:
 
 ```json
 {
@@ -182,13 +180,11 @@ When executing a method, it is often useful to pass some parameters. Here's how 
 }
 ```
 
-Say the `movies` method takes a single argument: an object that includes a key called `filter` used to specify the query search criteria and a key called `limit`.
+The `()` key allows to pass parameters to the `movies` method, and `=>` is used to specify what to do with the result of the execution.
 
-The `()` key allows us to pass all parameters, while `=>` is used to define what to do with the result of the method call.
+As before, we are using the array bracket `[]` to process the collection elements.
 
-As in a previous example, we are using the array bracket `[]` to process the collection elements.
-
-We get the following results:
+We get the following result:
 
 ```json
 {
@@ -200,16 +196,16 @@ We get the following results:
 }
 ```
 
-### Key-value nodes
+### Object keys
 
-We have seen previously some examples involving the arrow symbol `=>`, let's enter into the details to understand how to write the keys and the values of the nested nodes.
+We have seen previously some examples involving the arrow symbol `=>`, let's enter into the details of this powerful feature.
 
-Object **keys** are made of two parts, a "source" and a "target", separated by the arrow symbol (`=>`).
+Object keys are made of two parts, a "source" and a "target", separated by an arrow symbol (`=>`).
 
 - The "source" is the method or the field name, evaluated in the current context.
 - The "target" is the place where to put the result of the evaluation in the response.
 
-Source, target, or both can be omitted, producing slightly different results. Let's check the five available variants.
+Source, target, or both can be omitted, producing slightly different results. Let's check the five possible variants.
 
 #### 1. `"key"` variant
 
@@ -225,7 +221,17 @@ It's the most frequent use-case, when the response structure mirrors exactly the
 }
 ```
 
-Note: the key `title` could be expressed by `title=>title`, it would work too.
+> Note: The key `title` could be expressed by `title=>title`, it would work too.
+
+Not surprisingly, it will return something like that:
+
+```json
+{
+  "movie": {
+    "title": "Inception"
+  }
+}
+```
 
 #### 2. `"sourceKey=>targetKey"` variant
 
@@ -233,11 +239,11 @@ If source and target are different, the result of the evaluation of `sourceKey` 
 
 For example `createdAt=>date` key means the `createdAt` field (or method) result will appear under a key called `date` in the response.
 
-In this case, you can think about the `target` as a way to create aliases, a way to rename things in the query response (similar to [GraphQL aliases](https://graphql.org/learn/queries/#aliases)).
+You can think about it as a way to create aliases, similarly to the GraphQL's [aliasing feature](https://graphql.org/learn/queries/#aliases).
 
-By using aliases, it is possible to execute a method several times with different parameters, avoiding name collisions inside the result.
+By using aliases, it is possible to execute a method more than once with different parameters, avoiding name collisions inside the result.
 
-For example, in the following query, we first call `movies` method and assign the result to `actionMovies`. Then, we call the same `movies` method, with different parameters, and assign the result to `dramaMovies`.
+For example, in the following query, we first call the `movies` method and assign the result to `actionMovies`. Then, we call the same `movies` method, with different parameters, and assign the result to `dramaMovies`.
 
 ```json
 {
@@ -260,7 +266,7 @@ For example, in the following query, we first call `movies` method and assign th
 }
 ```
 
-Doing this we can access both method results `actionMovies` and `dramaMovies` in the query response, like this:
+Doing this we get both `actionMovies` and `dramaMovies` results in the response, like this:
 
 ```json
 {
@@ -284,7 +290,7 @@ Doing this we can access both method results `actionMovies` and `dramaMovies` in
 
 If the source is omitted, it means the current context will be re-used in the response as it is, without any processing.
 
-For example, in the following query, `=>items` means we take the current context and put it inside an object whose key is `items`. Basically we are nesting the current context one level deeper, under a new key.
+For example, in the following query, `=>items` means we take the current context and put it inside an object whose key is `items`. Basically, we are nesting the current context one level deeper, under a new key.
 
 ```json
 {
@@ -299,7 +305,7 @@ For example, in the following query, `=>items` means we take the current context
 }
 ```
 
-Doing this, we can access the array of movies under a new key called `items`, while adding a `count` property to the `movies` object:
+Doing this, we can query both a collection and its elements to produce results such as:
 
 ```json
 {
@@ -319,7 +325,7 @@ Doing this, we can access the array of movies under a new key called `items`, wh
 
 #### 4. `"sourceKey=>"` variant
 
-If the target is omitted, it means that the evaluation of the method or the field does not generate a new object.
+If the target is omitted, it means that the evaluation of a method (or field) does not generate a new object.
 
 For example, if we are only interested in the title of the movie we found, we could do that:
 
@@ -358,7 +364,7 @@ In the following query, we retrieve a movie by its `id` and we return `title` an
 }
 ```
 
-Note: the following query is exactly the same.
+Note that the following query is exactly the same:
 
 ```json
 {
@@ -381,19 +387,42 @@ Both queries will produce the following response:
 }
 ```
 
+This feature is particularly useful to access the elements of a collection. For example :
+
+```json
+{
+  "movies": {
+    "()": {"filter": {"country": "USA"}},
+    "=>": [
+      {
+        "title": true
+      }
+    ]
+  }
+}
+```
+
+Will output:
+
+```json
+{
+  "movies": [{"title": "Inception"}, {"title": "The Matrix"}, {"title": "Forest Gump"}]
+}
+```
+
 ### Query execution
 
-Query objects are evaluated in a recursive way, for every key the related node can be either:
+Query objects are evaluated in a recursive way, and for every key the related value can be either:
 
 - The boolean `true`
 - An object
 - An array
 
-Let's see how Deepr handles these three types of node.
+Let's see how Deepr handles these three kinds of value.
 
 #### Boolean `true`
 
-The boolean `true` means the result of the method or the field will be included in the response, following the format defined in the key (see above).
+The boolean `true` means the result of the method or the field will be included as is in the response.
 
 If we query a single movie this way:
 
@@ -406,7 +435,7 @@ If we query a single movie this way:
 }
 ```
 
-We get a response whose shape mirrors the query's one:
+We get the following result:
 
 ```json
 {
@@ -419,7 +448,7 @@ We get a response whose shape mirrors the query's one:
 
 #### Object
 
-When an object is found, the execution will continue recursively, applying every key to the current context.
+When the value is an object, the execution continues recursively:
 
 ```json
 {
@@ -431,7 +460,7 @@ When an object is found, the execution will continue recursively, applying every
 }
 ```
 
-Once again, the response shape mirrors the query's one:
+As expected, it will produce:
 
 ```json
 {
@@ -445,7 +474,7 @@ Once again, the response shape mirrors the query's one:
 
 #### Array
 
-The array type allows to access the elements of a collection. For example:
+Finally, by embedding an object into an array, we can access the elements of a collection. For example:
 
 ```json
 {
@@ -457,13 +486,13 @@ Will return:
 
 ```json
 {
-  "movies": [{"title": "Inception"}, {"title": "The Matrix"}]
+  "movies": [{"title": "Inception"}, {"title": "The Matrix"}, {"title": "Forest Gump"}]
 }
 ```
 
 ### Chained queries
 
-Now, let's compose a more complex query involving several chained methods:
+Now, let's put into practice what we've just seen to compose a more complex query:
 
 ```json
 {
@@ -490,7 +519,7 @@ Now, let's compose a more complex query involving several chained methods:
 }
 ```
 
-It will return:
+Despite the fact that we have nested several method calls, it will just return:
 
 ```json
 {
@@ -509,7 +538,7 @@ It will return:
 
 ### Mutations
 
-So far, we have invoked methods that only read data and don't produce any side effects on the server. Let's see now how to execute some simple CRUD operations.
+So far we have invoked methods that read data without producing any side effects on the server. Let's fix that by executing some simple CRUD operations.
 
 #### Create
 
@@ -517,16 +546,18 @@ Here is how we could create a record:
 
 ```json
 {
-  "movies.create=>movie": {
-    "()": {"title": "Avatar", "country": "USA"},
-    "=>": {"id": true}
+  "movies=>": {
+    "create=>movie": {
+      "()": {"title": "Avatar", "country": "USA"},
+      "=>": {"id": true}
+    }
   }
 }
 ```
 
-Unlike GraphQL, Deepr does not differentiate queries and mutations. So, performing a mutation is just a matter of calling the right method.
+Unlike GraphQL, Deepr does not differentiate queries and mutations. So, performing a mutation is just a matter of calling a method.
 
-It will simply return:
+It will return:
 
 ```json
 {
@@ -538,7 +569,7 @@ It will simply return:
 
 #### Read
 
-Now that we have added a record, let's fetch it:
+Now that we have added a movie, let's retrieve it:
 
 ```json
 {
@@ -573,7 +604,7 @@ To modify a record, we could do so:
 }
 ```
 
-Note how we use the key `"update=>"` instead of `"update"`. As explained before, to avoid creating an unnecessary `"update"` key in the response:
+Note how we use the key `"update=>"` instead of `"update"` to avoid creating an unnecessary `"update"` key in the response:
 
 ```json
 {
@@ -608,7 +639,7 @@ It will produce the following result:
 
 ### Relations
 
-This guide would not be complete without mentioning another important feature supported by Deepr: the ability to query relationships between collections.
+This guide would not be complete without mentioning another important feature: the ability to query relationships between collections.
 
 It's actually pretty straightforward. Here's how we could fetch some movies with their related actors:
 
@@ -616,19 +647,21 @@ It's actually pretty straightforward. Here's how we could fetch some movies with
 {
   "movies": {
     "()": {"filter": {"country": "USA"}},
-    "=>": {
-      "title": true,
-      "year": true,
-      "actors": {
-        "()": {"sort": {"by": "popularity"}, "limit": 2},
-        "=>": [
-          {
-            "fullName": true,
-            "photoURL": true
-          }
-        ]
+    "=>": [
+      {
+        "title": true,
+        "year": true,
+        "actors": {
+          "()": {"sort": {"by": "popularity"}, "limit": 2},
+          "=>": [
+            {
+              "fullName": true,
+              "photoURL": true
+            }
+          ]
+        }
       }
-    }
+    ]
   }
 }
 ```
@@ -672,7 +705,7 @@ It will return:
 
 ### Subscriptions
 
-We don't believe that subscriptions should be included in the core specifications of Deepr. We acknowledge it is an important feature though, and it might come later as an extension.
+We don't believe that subscriptions should be included in the core specifications of Deepr. We acknowledge it is an important feature though, and it might come later in the form of an extension.
 
 ## Implementation
 
@@ -680,7 +713,7 @@ TODO
 
 ## Specifications
 
-Deepr is still a work in progress and proper specifications will come later.
+Although pretty stable, Deepr is a work in progress, and formal specifications remain to be written.
 
 ## License
 
