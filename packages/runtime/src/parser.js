@@ -17,14 +17,14 @@ Transform a query:
 Into an expression that is easier to execute by the runtime:
 {
   "sourceKey": "",
-  "children": {
+  "nestedExpressions": {
     "actionMovies": {
       "sourceKey": "movies",
       "params": {"genre": "action"},
-      "child": {
+      "nextExpression": {
         "sourceKey": "reverse",
-        "childContext": "elements",
-        "children": {
+        "useCollectionElements": true,
+        "nestedExpressions": {
           "title": {
             "sourceKey": "title"
           },
@@ -45,7 +45,7 @@ export function parseQuery(query, {sourceKey = '', isOptional} = {}) {
     if (query.length !== 1) {
       throw new Error('An array should contain exactly one item');
     }
-    expression.childContext = 'elements';
+    expression.useCollectionElements = true;
     query = query[0];
   }
 
@@ -57,8 +57,8 @@ export function parseQuery(query, {sourceKey = '', isOptional} = {}) {
     throw new Error(`Invalid query found: ${JSON.stringify(query)}`);
   }
 
-  const children = {};
-  let child;
+  const nestedExpressions = {};
+  let nextExpression;
 
   for (const [key, value] of Object.entries(query)) {
     if (key === '()') {
@@ -70,21 +70,21 @@ export function parseQuery(query, {sourceKey = '', isOptional} = {}) {
     const subexpression = parseQuery(value, {sourceKey, isOptional});
 
     if (targetKey) {
-      children[targetKey] = subexpression;
+      nestedExpressions[targetKey] = subexpression;
     } else {
-      if (child) {
+      if (nextExpression) {
         throw new Error('Multiple empty targets found at the same level');
       }
-      child = subexpression;
+      nextExpression = subexpression;
     }
   }
 
-  if (Object.keys(children).length && child) {
+  if (Object.keys(nestedExpressions).length && nextExpression) {
     throw new Error('Empty and non-empty targets found at the same level');
   }
 
-  expression.children = children;
-  expression.child = child;
+  expression.nestedExpressions = nestedExpressions;
+  expression.nextExpression = nextExpression;
 
   return expression;
 }
