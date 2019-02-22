@@ -1,6 +1,11 @@
-# Deepr
+<h1 align="center">
+  <br>
+	<img src="branding/deepr-logo.svg" width="350" alt="Deepr">
+	<br>
+  <br>
+</h1>
 
-A specification for invoking remote methods, deeply!
+> A specification for invoking remote methods, deeply!
 
 ## Why?
 
