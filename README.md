@@ -737,9 +737,11 @@ This will return:
 
 We do not believe that subscriptions should be included in the core specifications of Deepr. We acknowledge it is an important feature, though, and it might be added later in the form of an extension.
 
-## Implementation
+## Runtime
 
-TODO
+To execute a Deepr query, we need a runtime. So we implemented a simple one in JavaScript. It's right here:
+
+https://github.com/medmain/deepr/tree/master/packages/runtime
 
 ## Specifications
 
