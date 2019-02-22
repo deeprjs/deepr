@@ -747,6 +747,10 @@ https://github.com/medmain/deepr/tree/master/packages/runtime
 
 Although pretty stable, Deepr is a work in progress, and formal specifications still have to written.
 
+## Logo
+
+Submarine by Andrejs Kirma from the Noun Project.
+
 ## License
 
 MIT
