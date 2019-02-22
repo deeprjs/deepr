@@ -1,8 +1,6 @@
 <h1 align="center">
-  <br>
 	<img src="branding/deepr-logo.svg" width="350" alt="Deepr">
 	<br>
-  <br>
 </h1>
 
 > A specification for invoking remote methods, deeply!
@@ -11,27 +9,29 @@
 
 [GraphQL](https://graphql.org/) introduced a powerful idea — the ability to invoke multiple methods in a single call, and more importantly, the ability to invoke methods based on the results of other methods. However, we feel that the design of GraphQL is not quite right. Some crucial points are missing and some features should be removed or implemented at different layers of the stack.
 
-First of all, with GraphQL it is not possible to invoke methods on collections. When we specify a query for a collection, it is executed on the elements of the collection, but not on the collection itself. It would be nice if we could access the collection and its elements separately. For example, depending on the schema, this query might not return the expected result:
+First of all, with GraphQL it is not possible to invoke methods on collections. When we specify a query for a collection, it is executed on the elements of the collection, but not on the collection itself. To solve this issue, it is necessary to introduce some additional models, as Relay does with the [Connections](https://facebook.github.io/relay/graphql/connections.htm). We think that such a solution adds complexity and confusion.
+
+For example, take the following query:
 
 ```graphql
 {
   movies(genre: "comedy") {
-    count
+    averageRating
   }
 }
 ```
 
-To make it work, it is necessary to introduce some additional models, as Relay does with the [Connections](https://facebook.github.io/relay/graphql/connections.htm). We think that such a solution adds complexity and confusion.
+Does `averageRating` refer to the movie collection or to a movie element? If we are not familiar with the schema, it is difficult to say.
 
 Another issue is the GraphQL execution model. Having queries executed in parallel seems like a good idea at first, but it has unfortunate consequences for the developer experience. Since the execution order of nested mutations is unpredictable, it is [not recommended](https://github.com/graphql/graphql-js/issues/221#issuecomment-157481861) to do something like this:
 
 ```graphql
 {
   movie(id: 123) {
-    update(changes: {rating: 8.3})
+    update(rating: 8.3)
   }
   allMovies {
-    averageRate
+    averageRating
   }
 }
 ```
