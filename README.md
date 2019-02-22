@@ -745,7 +745,7 @@ https://github.com/medmain/deepr/tree/master/packages/runtime
 
 ## Specifications
 
-Although pretty stable, Deepr is a work in progress, and formal specifications still have to written.
+Although pretty stable, Deepr is a work in progress, and formal specifications still have to be written.
 
 ## Logo
 
