@@ -285,6 +285,28 @@ describe('@deepr/runtime', () => {
   });
 
   describe('Options', () => {
+    test('context', async () => {
+      expect(
+        await invokeQuery(
+          {
+            movie({id}, {accessToken}) {
+              if (accessToken !== 'super-secret-token') {
+                throw new Error('Access denied');
+              }
+              if (id === 'cjrts72gy00ik01rv6eins4se') {
+                return {title: 'Inception', year: 2010, country: 'USA'};
+              }
+              throw new Error('Movie not found');
+            }
+          },
+          {
+            movie: {'()': {id: 'cjrts72gy00ik01rv6eins4se'}, '=>': {title: true}}
+          },
+          {context: {accessToken: 'super-secret-token'}}
+        )
+      ).toEqual({movie: {title: 'Inception'}});
+    });
+
     test('ignoreKeys', async () => {
       expect(
         await invokeQuery(
