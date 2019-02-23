@@ -42,24 +42,18 @@ async function _invokeExpression(
     const collection = object;
     const results = [];
     for (const object of collection) {
-      results.push(
-        await _invokeSubexpressions(object, {nestedExpressions, nextExpression}, options)
-      );
+      results.push(await _invokeExpression(object, {nestedExpressions, nextExpression}, options));
     }
     return results;
   }
 
-  return await _invokeSubexpressions(object, {nestedExpressions, nextExpression}, options);
-}
-
-async function _invokeSubexpressions(object, {nestedExpressions, nextExpression}, options) {
   if (nextExpression) {
-    return await invokeExpression(object, nextExpression, options);
+    return await _invokeExpression(object, nextExpression, options);
   }
 
   const results = {};
   for (const [targetKey, nestedExpression] of Object.entries(nestedExpressions)) {
-    results[targetKey] = await invokeExpression(object, nestedExpression, options);
+    results[targetKey] = await _invokeExpression(object, nestedExpression, options);
   }
   return results;
 }
