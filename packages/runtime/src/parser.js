@@ -38,7 +38,23 @@ Into an expression that is easier to execute by the runtime:
 }
 */
 
-export function parseQuery(query, {sourceKey = '', isOptional} = {}) {
+export function parseQuery(query, {ignoreKeys = []} = {}) {
+  if (query === undefined) {
+    throw new Error(`'query' parameter is missing`);
+  }
+
+  if (!Array.isArray(ignoreKeys)) {
+    ignoreKeys = [ignoreKeys];
+  }
+
+  return _parseQuery(query, {}, {ignoreKeys});
+}
+
+function _parseQuery(query, {sourceKey = '', isOptional}, {ignoreKeys}) {
+  if (query === undefined) {
+    throw new Error(`'query' parameter is missing`);
+  }
+
   const expression = {sourceKey, isOptional};
 
   if (Array.isArray(query)) {
@@ -67,7 +83,12 @@ export function parseQuery(query, {sourceKey = '', isOptional} = {}) {
     }
 
     const {sourceKey, targetKey, isOptional} = parseKey(key);
-    const subexpression = parseQuery(value, {sourceKey, isOptional});
+
+    if (testKey(sourceKey, ignoreKeys)) {
+      continue;
+    }
+
+    const subexpression = _parseQuery(value, {sourceKey, isOptional}, {ignoreKeys});
 
     if (targetKey) {
       nestedExpressions[targetKey] = subexpression;
@@ -118,4 +139,10 @@ function parseSourceKey(sourceKey) {
     sourceKey = sourceKey.slice(0, -1);
   }
   return {sourceKey, isOptional};
+}
+
+function testKey(key, patterns) {
+  return patterns.some(pattern =>
+    typeof pattern === 'string' ? pattern === key : pattern.test(key)
+  );
 }

@@ -1,7 +1,19 @@
-export async function invokeExpression(
+export function invokeExpression(object, expression, options = {}) {
+  if (object === undefined) {
+    throw new Error(`'object' parameter is missing`);
+  }
+
+  if (expression === undefined) {
+    throw new Error(`'expression' parameter is missing`);
+  }
+
+  return _invokeExpression(object, expression, options);
+}
+
+async function _invokeExpression(
   object,
   {sourceKey, isOptional, params, useCollectionElements, nestedExpressions, nextExpression},
-  context
+  options
 ) {
   // TODO: Improve error handling
 
@@ -11,7 +23,7 @@ export async function invokeExpression(
       if (property === undefined && isOptional) {
         object = undefined;
       } else {
-        object = await property.call(object, params, context);
+        object = await property.call(object, params, options.context);
       }
     } else {
       object = property;
@@ -31,23 +43,23 @@ export async function invokeExpression(
     const results = [];
     for (const object of collection) {
       results.push(
-        await _invokeSubexpressions(object, {nestedExpressions, nextExpression}, context)
+        await _invokeSubexpressions(object, {nestedExpressions, nextExpression}, options)
       );
     }
     return results;
   }
 
-  return await _invokeSubexpressions(object, {nestedExpressions, nextExpression}, context);
+  return await _invokeSubexpressions(object, {nestedExpressions, nextExpression}, options);
 }
 
-async function _invokeSubexpressions(object, {nestedExpressions, nextExpression}, context) {
+async function _invokeSubexpressions(object, {nestedExpressions, nextExpression}, options) {
   if (nextExpression) {
-    return await invokeExpression(object, nextExpression, context);
+    return await invokeExpression(object, nextExpression, options);
   }
 
   const results = {};
   for (const [targetKey, nestedExpression] of Object.entries(nestedExpressions)) {
-    results[targetKey] = await invokeExpression(object, nestedExpression, context);
+    results[targetKey] = await invokeExpression(object, nestedExpression, options);
   }
   return results;
 }

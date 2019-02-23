@@ -283,4 +283,26 @@ describe('@deepr/runtime', () => {
       }
     });
   });
+
+  describe('Options', () => {
+    test('ignoreKeys', async () => {
+      expect(
+        await invokeQuery(
+          {
+            user: {
+              username: 'steve',
+              password: 'secret',
+              _privateMethod() {
+                return 'private information';
+              }
+            }
+          },
+          {
+            user: {username: true, password: true, _privateMethod: true}
+          },
+          {ignoreKeys: ['password', /^_/]}
+        )
+      ).toEqual({user: {username: 'steve'}});
+    });
+  });
 });
