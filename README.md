@@ -735,11 +735,11 @@ This will return:
 
 ### Subscriptions
 
-We do not believe that subscriptions should be included in the core specifications of Deepr. We acknowledge it is an important feature, though, and it might be added later in the form of an extension.
+We do not believe that [subscriptions](https://facebook.github.io/graphql/draft/#sec-Subscription) should be included in the core specifications of Deepr. We acknowledge it is an important feature, though, and it might be added later in the form of an extension.
 
 ## Runtime
 
-To execute a Deepr query, we need a runtime. So we implemented a simple one in JavaScript. It's right here:
+To execute a Deepr query, we need a runtime. We implemented a simple one in JavaScript. Here it is:
 
 https://github.com/medmain/deepr/tree/master/packages/runtime
 
