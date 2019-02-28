@@ -1,4 +1,4 @@
 #!/bin/bash
 
-run . @install --@dev
-run . @build --@dev
+run . @install
+run . @build
