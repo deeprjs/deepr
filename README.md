@@ -496,7 +496,7 @@ will return:
 
 ### Fault-tolerant queries
 
-If you add an exclamation mark (`?`) after the name of a key, then no error will be thrown in case a field or a method is missing during the execution of a query.
+If you add a question mark (`?`) after the name of a key, then no error will be thrown in case a field or a method is missing during the execution of a query.
 
 For example, the following query will succeed even if the movie has no director:
 
