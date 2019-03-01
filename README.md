@@ -1,9 +1,9 @@
 <h1 align="center">
-	<img src="branding/deepr-logo.svg" width="350" alt="Deepr">
+	<img src="branding/deepr-logo-with-tagline.svg" width="350" alt="Deepr — A specification for invoking remote methods, deeply!">
 	<br>
 </h1>
 
-> A specification for invoking remote methods, deeply!
+> Featured on [Changelog News](https://changelog.com/news/deepr-an-alternative-to-graphql-kkme).
 
 ## Why?
 
