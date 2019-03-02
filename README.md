@@ -312,7 +312,7 @@ Doing this we get both `actionMovies` and `dramaMovies` results in the response,
 }
 ```
 
-#### `"=>targetKey"` variant (return and nest)
+#### `"=>targetKey"` variant (nest)
 
 If the source is omitted, it means the current context will be re-used in the response as it is, without any processing.
 
