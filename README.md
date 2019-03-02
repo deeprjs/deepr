@@ -46,6 +46,28 @@ Finally, let's question the very nature of GraphQL: the fact that it is a langua
 
 We love the main idea behind GraphQL, especially the ability to compose method calls, but we think there may be a better way to achieve this goal. That is why we wrote Deepr.
 
+## Feature comparison
+
+|                     | Deepr | GraphQL | REST |
+| ------------------- | :---: | :-----: | :--: |
+| Root queries        |  ✅   |   ✅    |  ✅  |
+| Deep queries        |  ✅   |   ✅    |      |
+| Parallel queries    |  (1)  |   ✅    |      |
+| Sequential queries  |  ✅   |         |      |
+| Aliases             |  ✅   |   ✅    |      |
+| Unnesting           |  ✅   |         |      |
+| Root mutations      |  ✅   |   ✅    |  ✅  |
+| Deep mutations      |  ✅   |         |      |
+| Collections         |  ✅   |         |  ✅  |
+| No additional layer |  ✅   |         |      |
+| Type system         |  (1)  |   ✅    |      |
+| Introspection       |  (2)  |   ✅    |      |
+| No extra language   |  ✅   |         |  ✅  |
+| Subscriptions       |  (1)  |   ✅    |      |
+
+1. We believe these features should be implemented at another layer of the stack.
+2. Introspection will come later in the form of an extension.
+
 ## Guide
 
 Deepr does not specify the use of a particular language. So, although the following examples are written in JSON, keep in mind that any language could be used.
@@ -329,7 +351,7 @@ Doing this, we can query both a collection and its elements to produce results s
 
 #### `"sourceKey=>"` variant
 
-If the target is omitted, it means that the evaluation of a method (or field) does not generate a new object.
+If the target is omitted, it means that the evaluation of a method (or field) does not generate a new object. We call this feature "Unnesting".
 
 For example, if we are only interested in the title of the movie we found, we can do this:
 
