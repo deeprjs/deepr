@@ -500,7 +500,7 @@ As expected, this will produce:
 
 #### Array
 
-Finally, by embedding an object into an array, we can access the elements of a collection. For example:
+Finally, by specifying an array, we can access the elements of a collection. For example:
 
 ```json
 {
