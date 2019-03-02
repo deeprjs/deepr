@@ -234,7 +234,7 @@ Object keys are made of two parts, a "source" and a "target", separated by the a
 
 Source, target, or both can be omitted, producing slightly different results. Let's check the five possible variants.
 
-#### `"key"` variant
+#### `"key"` variant (mirror)
 
 If there is no arrow symbol it means that source and target are the same.
 This is the most frequent use-case, when the response structure mirrors exactly the query structure.
@@ -259,7 +259,7 @@ Not surprisingly, this will return something like this:
 }
 ```
 
-#### `"sourceKey=>targetKey"` variant
+#### `"sourceKey=>targetKey"` variant (alias)
 
 If source and target are different, the result of the evaluation of `sourceKey` will appear under a key called `targetKey` in the response.
 
@@ -312,7 +312,7 @@ Doing this we get both `actionMovies` and `dramaMovies` results in the response,
 }
 ```
 
-#### `"=>targetKey"` variant
+#### `"=>targetKey"` variant (return and nest)
 
 If the source is omitted, it means the current context will be re-used in the response as it is, without any processing.
 
@@ -349,7 +349,7 @@ Doing this, we can query both a collection and its elements to produce results s
 }
 ```
 
-#### `"sourceKey=>"` variant
+#### `"sourceKey=>"` variant (unnest)
 
 If the target is omitted, it means that the evaluation of a method (or field) does not generate a new object. We call this feature "Unnesting".
 
@@ -371,7 +371,7 @@ Because we use the key `"title=>"` instead of `"title"`, the key `title` is abse
 }
 ```
 
-#### `"=>"` variant
+#### `"=>"` variant (return)
 
 Lastly, we can remove both the source and the target from the key expression, leaving alone the arrow symbol `=>`.
 
