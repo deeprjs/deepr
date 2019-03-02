@@ -63,10 +63,12 @@ Example:
 
 ```js
 const result = await invokeQuery(root, {
-  movie: {
-    title: true,
-    year: true
-  }
+  movies: [
+    {
+      title: true,
+      year: true
+    }
+  ]
 });
 ```
 
