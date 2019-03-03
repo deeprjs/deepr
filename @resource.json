@@ -1,17 +1,6 @@
 {
   "@import": "medmain/js-repository#^0.1.0",
-  "install": {
-    "@type": "method",
-    "@run": [
-      "./packages/runtime @install"
-    ],
-    "@listen": "@install"
-  },
-  "build": {
-    "@type": "method",
-    "@run": [
-      "./packages/runtime @build"
-    ],
-    "@listen": "@build"
+  "runtime": {
+    "@include": "./packages/runtime"
   }
 }
