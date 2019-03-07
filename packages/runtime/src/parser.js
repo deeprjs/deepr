@@ -38,7 +38,10 @@ Into an expression that is easier to execute by the runtime:
 }
 */
 
-export function parseQuery(query, {ignoreKeys = []} = {}) {
+export function parseQuery(
+  query,
+  {ignoreKeys = [], acceptKeys = [], ignoreBuiltInKeys = true} = {}
+) {
   if (query === undefined) {
     throw new Error(`'query' parameter is missing`);
   }
@@ -47,10 +50,18 @@ export function parseQuery(query, {ignoreKeys = []} = {}) {
     ignoreKeys = [ignoreKeys];
   }
 
-  return _parseQuery(query, {}, {ignoreKeys});
+  if (!Array.isArray(acceptKeys)) {
+    acceptKeys = [acceptKeys];
+  }
+
+  return _parseQuery(query, {}, {ignoreKeys, acceptKeys, ignoreBuiltInKeys});
 }
 
-function _parseQuery(query, {sourceKey = '', isOptional}, {ignoreKeys}) {
+function _parseQuery(
+  query,
+  {sourceKey = '', isOptional},
+  {ignoreKeys, acceptKeys, ignoreBuiltInKeys}
+) {
   if (query === undefined) {
     throw new Error(`'query' parameter is missing`);
   }
@@ -73,7 +84,7 @@ function _parseQuery(query, {sourceKey = '', isOptional}, {ignoreKeys}) {
     throw new Error(`Invalid query found: ${JSON.stringify(query)}`);
   }
 
-  const nestedExpressions = {};
+  let nestedExpressions;
   let nextExpression;
 
   for (const [key, value] of Object.entries(query)) {
@@ -84,13 +95,24 @@ function _parseQuery(query, {sourceKey = '', isOptional}, {ignoreKeys}) {
 
     const {sourceKey, targetKey, isOptional} = parseKey(key);
 
-    if (testKey(sourceKey, ignoreKeys)) {
+    if (ignoreBuiltInKeys && builtInKeys.includes(sourceKey)) {
       continue;
     }
 
-    const subexpression = _parseQuery(value, {sourceKey, isOptional}, {ignoreKeys});
+    if (testKey(sourceKey, ignoreKeys) && !testKey(sourceKey, acceptKeys)) {
+      continue;
+    }
+
+    const subexpression = _parseQuery(
+      value,
+      {sourceKey, isOptional},
+      {ignoreKeys, acceptKeys, ignoreBuiltInKeys}
+    );
 
     if (targetKey) {
+      if (nestedExpressions === undefined) {
+        nestedExpressions = {};
+      }
       nestedExpressions[targetKey] = subexpression;
     } else {
       if (nextExpression) {
@@ -100,12 +122,16 @@ function _parseQuery(query, {sourceKey = '', isOptional}, {ignoreKeys}) {
     }
   }
 
-  if (Object.keys(nestedExpressions).length && nextExpression) {
-    throw new Error('Empty and non-empty targets found at the same level');
+  if (nextExpression !== undefined) {
+    if (nestedExpressions) {
+      throw new Error('Empty and non-empty targets found at the same level');
+    }
+    expression.nextExpression = nextExpression;
   }
 
-  expression.nestedExpressions = nestedExpressions;
-  expression.nextExpression = nextExpression;
+  if (nestedExpressions !== undefined) {
+    expression.nestedExpressions = nestedExpressions;
+  }
 
   return expression;
 }
@@ -145,4 +171,23 @@ function testKey(key, patterns) {
   return patterns.some(pattern =>
     typeof pattern === 'string' ? pattern === key : pattern.test(key)
   );
+}
+
+const builtInKeys = [];
+class Obj {}
+const obj = new Obj();
+const func = function () {};
+addKeys(builtInKeys, obj);
+addKeys(builtInKeys, func);
+addKeys(builtInKeys, Obj);
+
+function addKeys(array, object) {
+  while (object) {
+    for (const key of Object.getOwnPropertyNames(object)) {
+      if (!(key === 'name' || key === 'length' || array.indexOf(key) !== -1)) {
+        array.push(key);
+      }
+    }
+    object = Object.getPrototypeOf(object);
+  }
 }

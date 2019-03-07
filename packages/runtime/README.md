@@ -129,6 +129,20 @@ Examples:
 - Using the string `'password'` will ignore every key named `'password'`.
 - Using the RegExp `/^_/` will ignore every key starting with an underscore.
 
+##### `acceptKeys`
+
+A key or an array of keys to be accepted regardless if they are ignored using the `ignoreKeys` option. A key can be specified as a string or a [RegExp](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions).
+
+Example:
+
+- Specifying the string `'_id'` will accept this key even if the `ignoreKeys` option includes the RegExp `/^_/`.
+
+##### `ignoreBuiltInKeys` _(default: `true`)_
+
+If `true` (the default), all JavaScript built-in keys will be ignored. This includes object and function built-in keys such as `constructor`, `prototype`, `apply`, `caller`, `__proto__`, `hasOwnProperty`, etc. Even if they are built-in, the keys `name` and `length` are considered safe, and therefore accepted.
+
+For obvious security reasons, it is strongly discouraged to disable this option.
+
 ## Contribute
 
 This project uses [Run](https://run.tools) to manage the development environment.

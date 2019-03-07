@@ -326,5 +326,43 @@ describe('@deepr/runtime', () => {
         )
       ).toEqual({user: {username: 'steve'}});
     });
+
+    test('acceptKeys', async () => {
+      expect(
+        await invokeQuery(
+          {
+            user: {
+              _id: 'abc123',
+              username: 'steve',
+              _password: 'secret'
+            }
+          },
+          {
+            user: {_id: true, username: true, _password: true}
+          },
+          {ignoreKeys: /^_/, acceptKeys: '_id'}
+        )
+      ).toEqual({user: {_id: 'abc123', username: 'steve'}});
+    });
+
+    test('ignoreBuiltInKeys', async () => {
+      const root = {
+        user: {
+          username: 'steve'
+        }
+      };
+
+      const query = {
+        user: {username: true, hasOwnProperty: {'()': 'username'}}
+      };
+
+      expect(await invokeQuery(root, query)).toEqual({
+        user: {username: 'steve'}
+      });
+
+      expect(await invokeQuery(root, query, {ignoreBuiltInKeys: false})).toEqual({
+        user: {username: 'steve', hasOwnProperty: true}
+      });
+    });
   });
 });
