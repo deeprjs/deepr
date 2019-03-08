@@ -1,5 +1,4 @@
 .DS_Store
-package.json
 node_modules
 npm-debug.log
 _private

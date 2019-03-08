@@ -95,7 +95,7 @@ function _parseQuery(
 
     const {sourceKey, targetKey, isOptional} = parseKey(key);
 
-    if (ignoreBuiltInKeys && builtInKeys.includes(sourceKey)) {
+    if (ignoreBuiltInKeys && getBuiltInKeys().includes(sourceKey)) {
       continue;
     }
 
@@ -173,15 +173,21 @@ function testKey(key, patterns) {
   );
 }
 
-const builtInKeys = [];
-class Obj {}
-const obj = new Obj();
-const func = function () {};
-addKeys(builtInKeys, obj);
-addKeys(builtInKeys, func);
-addKeys(builtInKeys, Obj);
+let _builtInKeys;
+function getBuiltInKeys() {
+  if (!_builtInKeys) {
+    _builtInKeys = [];
+    class Obj {}
+    const obj = new Obj();
+    const func = function () {};
+    _addKeys(_builtInKeys, obj);
+    _addKeys(_builtInKeys, func);
+    _addKeys(_builtInKeys, Obj);
+  }
+  return _builtInKeys;
+}
 
-function addKeys(array, object) {
+function _addKeys(array, object) {
   while (object) {
     for (const key of Object.getOwnPropertyNames(object)) {
       if (!(key === 'name' || key === 'length' || array.indexOf(key) !== -1)) {
