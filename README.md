@@ -3,8 +3,6 @@
 	<br>
 </h1>
 
-> Featured on [Changelog News](https://changelog.com/news/deepr-an-alternative-to-graphql-kkme).
-
 ## Why?
 
 [GraphQL](https://graphql.org/) introduced a powerful idea — the ability to invoke multiple methods in a single call, and more importantly, the ability to invoke methods based on the results of other methods. However, we feel that the design of GraphQL is not quite right. Some crucial points are missing and some features should be removed or implemented at different layers of the stack.
