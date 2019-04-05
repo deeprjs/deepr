@@ -205,9 +205,7 @@ When executing a method, it is often useful to pass some parameters. Here is how
 }
 ```
 
-The `()` key allows passing parameters to the `movies` method, and the arrow symbol `=>` is used to specify what to do with the result of the execution.
-
-As before, we are using the array bracket `[]` to process the collection's elements.
+The `()` key allows passing parameters to the `movies` method.
 
 We get the following result:
 
@@ -218,6 +216,21 @@ We get the following result:
       "title": "Inception"
     }
   ]
+}
+```
+
+To pass **multiple parameters**, use the `(...)` key and enclose the parameters in an array. For example:
+
+```json
+{
+  "movie": {
+    "(...)": [{"id": "cjrts72gy00ik01rv6eins4se"}, {"throwIfNotFound": true}],
+    "=>": [
+      {
+        "title": true
+      }
+    ]
+  }
 }
 ```
 

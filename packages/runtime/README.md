@@ -118,7 +118,7 @@ An optional object of options.
 
 ##### `context`
 
-A context that will be passed as a second parameter to all invoked methods.
+A context that will be passed as the last parameter to all invoked methods.
 
 ##### `ignoreKeys`
 

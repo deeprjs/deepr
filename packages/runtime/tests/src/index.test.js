@@ -68,7 +68,7 @@ describe('@deepr/runtime', () => {
   });
 
   describe('Parameters', () => {
-    test('Call a function with some parameters', async () => {
+    test('Call a function with one parameter', async () => {
       expect(
         await invokeQuery(
           {
@@ -82,6 +82,10 @@ describe('@deepr/runtime', () => {
           {movies: {'()': {filter: {year: 2010}, limit: 1}, '=>': [{title: true}]}}
         )
       ).toEqual({movies: [{title: 'Inception'}]});
+    });
+
+    test('Call a function with multiple parameters', async () => {
+      expect(await invokeQuery({sum: (a, b) => a + b}, {sum: {'(...)': [1, 2]}})).toEqual({sum: 3});
     });
   });
 

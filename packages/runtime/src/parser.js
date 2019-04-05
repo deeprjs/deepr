@@ -89,6 +89,11 @@ function _parseQuery(
 
   for (const [key, value] of Object.entries(query)) {
     if (key === '()') {
+      expression.params = [value];
+      continue;
+    }
+
+    if (key === '(...)') {
       expression.params = value;
       continue;
     }

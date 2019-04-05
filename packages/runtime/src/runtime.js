@@ -68,7 +68,7 @@ async function evaluateKey(object, {key, params, isOptional}, options) {
       );
     }
 
-    return await func.call(object, params, options.context);
+    return await func.call(object, ...(params || []), options.context);
   }
 
   return value;
