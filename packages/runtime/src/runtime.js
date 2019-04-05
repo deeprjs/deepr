@@ -52,7 +52,8 @@ async function evaluateKey(object, {key, params, isOptional}, options) {
   const value = object[key];
 
   const isFunction = typeof value === 'function';
-  if (isFunction || params) {
+  const isClass = startsWithUpperCase(key);
+  if ((isFunction && !isClass) || params) {
     const func = value;
 
     if (func === undefined) {
@@ -72,4 +73,9 @@ async function evaluateKey(object, {key, params, isOptional}, options) {
   }
 
   return value;
+}
+
+function startsWithUpperCase(string) {
+  const firstCharacter = string.substr(0, 1);
+  return firstCharacter.toUpperCase() === firstCharacter;
 }

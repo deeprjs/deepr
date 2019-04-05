@@ -85,7 +85,40 @@ describe('@deepr/runtime', () => {
     });
 
     test('Call a function with multiple parameters', async () => {
-      expect(await invokeQuery({sum: (a, b) => a + b}, {sum: {'(...)': [1, 2]}})).toEqual({sum: 3});
+      expect(
+        await invokeQuery(
+          {
+            sum(a, b) {
+              return a + b;
+            }
+          },
+          {sum: {'(...)': [1, 2]}}
+        )
+      ).toEqual({sum: 3});
+    });
+
+    test('Call a function without specifying parameters', async () => {
+      expect(
+        await invokeQuery(
+          {
+            movies() {
+              return [{title: 'Inception'}];
+            }
+          },
+          {movies: [{title: true}]}
+        )
+      ).toEqual({movies: [{title: 'Inception'}]});
+    });
+
+    test('Specify a class without specifying parameters', async () => {
+      class Movies {
+        static count() {
+          return 2;
+        }
+      }
+      expect(await invokeQuery({Movies}, {Movies: {count: true}})).toEqual({
+        Movies: {count: 2}
+      });
     });
   });
 
