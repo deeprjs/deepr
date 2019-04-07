@@ -92,7 +92,7 @@ describe('@deepr/runtime', () => {
               return a + b;
             }
           },
-          {sum: {'(...)': [1, 2]}}
+          {sum: {'([])': [1, 2]}}
         )
       ).toEqual({sum: 3});
     });

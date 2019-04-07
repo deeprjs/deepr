@@ -93,7 +93,7 @@ function _parseQuery(
       continue;
     }
 
-    if (key === '(...)') {
+    if (key === '([])') {
       expression.params = value;
       continue;
     }

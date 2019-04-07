@@ -219,12 +219,12 @@ We get the following result:
 }
 ```
 
-To pass **multiple parameters**, use the `(...)` key and enclose the parameters in an array. For example:
+To pass **multiple parameters**, use the `([])` key and enclose the parameters in an array. For example:
 
 ```json
 {
   "movie": {
-    "(...)": [{"id": "cjrts72gy00ik01rv6eins4se"}, {"throwIfNotFound": true}],
+    "([])": [{"id": "cjrts72gy00ik01rv6eins4se"}, {"throwIfNotFound": true}],
     "=>": [
       {
         "title": true
