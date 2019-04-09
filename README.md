@@ -57,6 +57,7 @@ We love the main idea behind GraphQL, especially the ability to compose method c
 | Root mutations      |  ✅   |   ✅    |  ✅  |
 | Deep mutations      |  ✅   |         |      |
 | Collections         |  ✅   |         |  ✅  |
+| Source values       |  ✅   |         |      |
 | No additional layer |  ✅   |         |      |
 | Type system         |  (1)  |   ✅    |      |
 | Introspection       |  (2)  |   ✅    |      |
@@ -692,6 +693,31 @@ Finally, here is how we can delete a record:
 ```
 
 This will produce the following result:
+
+```json
+{
+  "movie": {
+    "id": "cjrts72gy00ik01rv6eins4se"
+  }
+}
+```
+
+### Source values
+
+Sometimes it is useful to execute a query from a source value. To do so, we can use the "<=" key.
+
+Using this feature, the previous example for creating a movie could be written as follows:
+
+```json
+{
+  "<=": {"_type": "Movie", "title": "Avatar", "country": "USA"},
+  "save=>movie": {
+    "id": true
+  }
+}
+```
+
+As before, this will return:
 
 ```json
 {

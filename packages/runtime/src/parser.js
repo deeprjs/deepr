@@ -57,6 +57,7 @@ export function parseQuery(
   return _parseQuery(query, {}, {ignoreKeys, acceptKeys, ignoreBuiltInKeys});
 }
 
+// eslint-disable-next-line complexity
 function _parseQuery(
   query,
   {sourceKey = '', isOptional},
@@ -84,17 +85,33 @@ function _parseQuery(
     throw new Error(`Invalid query found: ${JSON.stringify(query)}`);
   }
 
+  let params;
+  let sourceValue;
   let nestedExpressions;
   let nextExpression;
 
   for (const [key, value] of Object.entries(query)) {
     if (key === '()') {
-      expression.params = [value];
+      if (params !== undefined) {
+        throw new Error('Multiple parameters found at the same level');
+      }
+      params = [value];
       continue;
     }
 
     if (key === '([])') {
-      expression.params = value;
+      if (params !== undefined) {
+        throw new Error('Multiple parameters found at the same level');
+      }
+      params = value;
+      continue;
+    }
+
+    if (key === '<=') {
+      if (sourceValue !== undefined) {
+        throw new Error('Multiple source values found at the same level');
+      }
+      sourceValue = value;
       continue;
     }
 
@@ -125,6 +142,14 @@ function _parseQuery(
       }
       nextExpression = subexpression;
     }
+  }
+
+  if (params !== undefined) {
+    expression.params = params;
+  }
+
+  if (sourceValue !== undefined) {
+    expression.sourceValue = sourceValue;
   }
 
   if (nextExpression !== undefined) {

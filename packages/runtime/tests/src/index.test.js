@@ -273,25 +273,31 @@ describe('@deepr/runtime', () => {
     });
   });
 
-  describe('Fault-tolerant queries', () => {
-    test('Get attributes of an object', async () => {
-      await expect(
-        invokeQuery(
-          {movie: {title: 'Inception'}},
-          {movie: {title: true, director: {fullName: true}}}
+  describe('Source values', () => {
+    test('Call a method on an object', async () => {
+      expect(
+        await invokeQuery(
+          {},
+          {
+            '<=': {
+              _type: 'Movie',
+              title: 'Avatar',
+              country: 'USA',
+              save() {
+                const {_type, title, country} = this;
+                return {_type, id: 'cjrts72gy00ik01rv6eins4se', title, country};
+              }
+            },
+            'save=>movie': {
+              id: true
+            }
+          }
         )
-      ).rejects.toThrow();
-
-      await expect(
-        invokeQuery(
-          {movie: {title: 'Inception'}},
-          {movie: {title: true, 'director?': {fullName: true}}}
-        )
-      ).resolves.toEqual({movie: {title: 'Inception'}});
-
-      await expect(
-        invokeQuery({movie: {title: 'Inception'}}, {movie: {title: true, director: true}})
-      ).resolves.toEqual({movie: {title: 'Inception'}});
+      ).toEqual({
+        movie: {
+          id: 'cjrts72gy00ik01rv6eins4se'
+        }
+      });
     });
   });
 

@@ -10,11 +10,23 @@ export function invokeExpression(object, expression, options = {}) {
 
 async function _invokeExpression(
   object,
-  {sourceKey, isOptional, params, useCollectionElements, nestedExpressions, nextExpression},
+  {
+    sourceKey,
+    isOptional,
+    params,
+    sourceValue,
+    useCollectionElements,
+    nestedExpressions,
+    nextExpression
+  },
   options
 ) {
   if (sourceKey) {
     object = await evaluateKey(object, {key: sourceKey, params, isOptional}, options);
+  }
+
+  if (sourceValue !== undefined) {
+    object = sourceValue;
   }
 
   if (!(nestedExpressions || nextExpression)) {
