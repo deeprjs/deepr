@@ -1,8 +1,11 @@
 {
   "@import": "medmain/npm-package#^0.1.0",
   "name": "@deepr/runtime",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Simple Deepr runtime",
+  "dependencies": {
+    "@deepr/util": "^0.1.0"
+  },
   "tests": {
     "@include": "./tests"
   }

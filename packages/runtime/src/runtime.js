@@ -1,3 +1,7 @@
+import {syncOrAsync, mapSyncOrAsync, mapObjectSyncOrAsync} from '@deepr/util';
+
+/* eslint-disable prefer-arrow-callback */
+
 export function invokeExpression(object, expression, options = {}) {
   if (object === undefined) {
     throw new Error(`'object' parameter is missing`);
@@ -8,7 +12,7 @@ export function invokeExpression(object, expression, options = {}) {
   return _invokeExpression(object, expression, options);
 }
 
-async function _invokeExpression(
+function _invokeExpression(
   object,
   {
     sourceKey,
@@ -21,46 +25,44 @@ async function _invokeExpression(
   },
   options
 ) {
-  if (sourceKey) {
-    object = await evaluateKey(object, {key: sourceKey, params, isOptional}, options);
-  }
+  object = sourceKey ? evaluateKey(object, {key: sourceKey, params, isOptional}, options) : object;
 
-  if (sourceValue !== undefined) {
-    object = sourceValue;
-  }
-
-  if (!(nestedExpressions || nextExpression)) {
-    return object;
-  }
-
-  if (object === undefined) {
-    if (isOptional) {
-      return undefined;
+  return syncOrAsync(object, function (object) {
+    if (sourceValue !== undefined) {
+      object = sourceValue;
     }
-    throw new Error(`Cannot execute a query on \`undefined\` (key: '${sourceKey}')`);
-  }
 
-  if (useCollectionElements) {
-    const collection = object;
-    const results = [];
-    for (const object of collection) {
-      results.push(await _invokeExpression(object, {nestedExpressions, nextExpression}, options));
+    if (!(nestedExpressions || nextExpression)) {
+      return object;
     }
+
+    if (object === undefined) {
+      if (isOptional) {
+        return undefined;
+      }
+      throw new Error(`Cannot execute a query on \`undefined\` (key: '${sourceKey}')`);
+    }
+
+    if (useCollectionElements) {
+      const collection = object;
+      const results = mapSyncOrAsync(collection, function (object) {
+        return _invokeExpression(object, {nestedExpressions, nextExpression}, options);
+      });
+      return results;
+    }
+
+    if (nextExpression) {
+      return _invokeExpression(object, nextExpression, options);
+    }
+
+    const results = mapObjectSyncOrAsync(nestedExpressions, function (nestedExpression) {
+      return _invokeExpression(object, nestedExpression, options);
+    });
     return results;
-  }
-
-  if (nextExpression) {
-    return await _invokeExpression(object, nextExpression, options);
-  }
-
-  const results = {};
-  for (const [targetKey, nestedExpression] of Object.entries(nestedExpressions)) {
-    results[targetKey] = await _invokeExpression(object, nestedExpression, options);
-  }
-  return results;
+  });
 }
 
-async function evaluateKey(object, {key, params, isOptional}, options) {
+function evaluateKey(object, {key, params, isOptional}, options) {
   const value = object[key];
 
   const isFunction = typeof value === 'function';
@@ -81,7 +83,7 @@ async function evaluateKey(object, {key, params, isOptional}, options) {
       );
     }
 
-    return await func.call(object, ...(params || []), options.context);
+    return func.call(object, ...(params || []), options.context);
   }
 
   return value;

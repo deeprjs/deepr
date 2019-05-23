@@ -4,7 +4,7 @@ const {invokeQuery} = require('..');
 
 (async () => {
   const root = {
-    movie({id}) {
+    async movie({id}) {
       if (id === 'abc123') {
         return {
           title: 'Inception',

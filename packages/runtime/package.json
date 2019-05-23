@@ -1,6 +1,6 @@
 {
   "name": "@deepr/runtime",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Simple Deepr runtime",
   "files": [
     "dist"
@@ -8,6 +8,9 @@
   "main": "dist/node/cjs",
   "module": "dist/node/esm",
   "browser": "dist/browser/esm",
+  "dependencies": {
+    "@deepr/util": "^0.1.0"
+  },
   "@managed": {
     "warning": "This file contains properties managed by a Resource. You should not modify them directly or use a command such as `npm install <name>`.",
     "properties": [

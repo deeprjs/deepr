@@ -16,7 +16,7 @@ import {invokeQuery} from '@deepr/runtime';
 (async () => {
   // Given the following "root" object:
   const root = {
-    movie({id}) {
+    async movie({id}) {
       // Let's pretend we are reading a record from a database
       if (id === 'abc123') {
         return {
@@ -57,7 +57,7 @@ import {invokeQuery} from '@deepr/runtime';
 
 ### `invokeQuery(root, query, [options])`
 
-Invoke the specified `query` on `root` and return a promise that resolves with the result.
+Invoke the specified `query` on `root`, and return the result of the invocation. If a promise is encountered during the execution, then a promise that resolves with the result is returned.
 
 Example:
 
