@@ -1,10 +1,10 @@
 {
   "name": "@deepr/util",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A few utility functions shared among Deepr's packages",
   "author": "Manuel Vila <hi@mvila.me>",
   "license": "MIT",
-  "repository": "https://github.com/medmain/deepr/tree/master/packages/util",
+  "repository": "https://github.com/layrjs/deepr/tree/master/packages/util",
   "files": [
     "dist"
   ],

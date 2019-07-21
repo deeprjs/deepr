@@ -1,6 +1,6 @@
 {
   "name": "@deepr/runtime",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Simple Deepr runtime",
   "files": [
     "dist"
@@ -11,6 +11,9 @@
   "dependencies": {
     "@deepr/util": "^0.1.0"
   },
+  "author": "Manuel Vila <hi@mvila.me>",
+  "license": "MIT",
+  "repository": "https://github.com/layrjs/deepr/tree/master/packages/runtime",
   "@managed": {
     "warning": "This file contains properties managed by a Resource. You should not modify them directly or use a command such as `npm install <name>`.",
     "properties": [

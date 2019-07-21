@@ -1,8 +1,11 @@
 {
   "@import": "medmain/npm-package#^0.1.0",
   "name": "@deepr/runtime",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Simple Deepr runtime",
+  "author": "Manuel Vila <hi@mvila.me>",
+  "license": "MIT",
+  "repository": "https://github.com/layrjs/deepr/tree/master/packages/runtime",
   "dependencies": {
     "@deepr/util": "^0.1.0"
   },
