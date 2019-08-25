@@ -1,6 +1,6 @@
 {
   "name": "@deepr/runtime",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Simple Deepr runtime",
   "files": [
     "dist"
@@ -13,7 +13,7 @@
   },
   "author": "Manuel Vila <hi@mvila.me>",
   "license": "MIT",
-  "repository": "https://github.com/layrjs/deepr/tree/master/packages/runtime",
+  "repository": "https://github.com/deeprjs/deepr/tree/master/packages/runtime",
   "@managed": {
     "warning": "This file contains properties managed by a Resource. You should not modify them directly or use a command such as `npm install <name>`.",
     "properties": [
@@ -34,7 +34,8 @@
       "dependencies",
       "peerDependencies",
       "optionalDependencies",
-      "devDependencies"
+      "devDependencies",
+      "private"
     ]
   }
 }

@@ -1,6 +1,6 @@
 # @deepr/runtime
 
-Simple [Deepr](https://github.com/layrjs/deepr) runtime.
+Simple [Deepr](https://github.com/deeprjs/deepr) runtime.
 
 ## Installation
 
@@ -110,7 +110,7 @@ Example:
 }
 ```
 
-Learn more about Deepr queries here: [https://github.com/layrjs/deepr](https://github.com/layrjs/deepr).
+Learn more about Deepr queries here: [https://github.com/deeprjs/deepr](https://github.com/deeprjs/deepr).
 
 #### `options`
 

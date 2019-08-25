@@ -800,7 +800,7 @@ We do not believe that [subscriptions](https://facebook.github.io/graphql/draft/
 
 To execute a Deepr query, we need a runtime. We implemented a simple one in JavaScript. Here it is:
 
-https://github.com/layrjs/deepr/tree/master/packages/runtime
+https://github.com/deeprjs/deepr/tree/master/packages/runtime
 
 ## Specifications
 

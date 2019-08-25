@@ -1,11 +1,11 @@
 {
   "@import": "1place/npm-package#^0.2.0",
   "name": "@deepr/runtime",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Simple Deepr runtime",
   "author": "Manuel Vila <hi@mvila.me>",
   "license": "MIT",
-  "repository": "https://github.com/layrjs/deepr/tree/master/packages/runtime",
+  "repository": "https://github.com/deeprjs/deepr/tree/master/packages/runtime",
   "dependencies": {
     "@deepr/util": "^0.1.0"
   },
