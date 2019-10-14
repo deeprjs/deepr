@@ -9,7 +9,7 @@
   "module": "dist/node/esm",
   "browser": "dist/browser/esm",
   "dependencies": {
-    "@deepr/util": "^0.1.0"
+    "possibly-async": "^0.1.0"
   },
   "author": "Manuel Vila <hi@mvila.me>",
   "license": "MIT",

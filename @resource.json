@@ -3,14 +3,10 @@
   "runtime": {
     "@include": "./packages/runtime"
   },
-  "util": {
-    "@include": "./packages/util"
-  },
   "link": {
     "@type": "method",
     "@run": [
-      "(@import shell/bash) run \"npm-link ./packages/runtime\"",
-      "(@import shell/bash) run \"npm-link ./packages/util\""
+      "(@import shell/bash) run \"npm-link ./packages/runtime\""
     ]
   }
 }

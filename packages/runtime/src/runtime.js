@@ -1,4 +1,4 @@
-import {syncOrAsync, mapSyncOrAsync, mapObjectSyncOrAsync} from '@deepr/util';
+import {possiblyAsync} from 'possibly-async';
 
 /* eslint-disable prefer-arrow-callback */
 
@@ -27,7 +27,7 @@ function _invokeExpression(
 ) {
   object = sourceKey ? evaluateKey(object, {key: sourceKey, params, isOptional}, options) : object;
 
-  return syncOrAsync(object, function (object) {
+  return possiblyAsync(object, function (object) {
     if (sourceValue !== undefined) {
       object = sourceValue;
     }
@@ -45,7 +45,7 @@ function _invokeExpression(
 
     if (useCollectionElements) {
       const collection = object;
-      const results = mapSyncOrAsync(collection, function (object) {
+      const results = possiblyAsync.map(collection, function (object) {
         return _invokeExpression(object, {nestedExpressions, nextExpression}, options);
       });
       return results;
@@ -55,7 +55,7 @@ function _invokeExpression(
       return _invokeExpression(object, nextExpression, options);
     }
 
-    const results = mapObjectSyncOrAsync(nestedExpressions, function (nestedExpression) {
+    const results = possiblyAsync.mapObject(nestedExpressions, function (nestedExpression) {
       return _invokeExpression(object, nestedExpression, options);
     });
     return results;
