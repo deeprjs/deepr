@@ -25,7 +25,7 @@ function _invokeExpression(
   },
   options
 ) {
-  object = sourceKey ? evaluateKey(object, {key: sourceKey, params, isOptional}, options) : object;
+  object = sourceKey ? evaluateKey(object, sourceKey, {params, isOptional}, options) : object;
 
   return possiblyAsync(object, function (object) {
     if (sourceValue !== undefined) {
@@ -62,21 +62,46 @@ function _invokeExpression(
   });
 }
 
-function evaluateKey(object, {key, params, isOptional}, options) {
+function evaluateKey(object, key, {params, isOptional}, options) {
   const value = object[key];
 
-  if (params !== undefined) {
-    const method = value;
-
-    if (method === undefined) {
-      if (isOptional) {
-        return undefined;
-      }
-      throw new Error(`Couldn't found a method matching the key '${key}'`);
-    }
-
-    return method.call(object, ...(params || []), options.context);
+  if (params === undefined) {
+    return evaluateAttribute(object, key, value, options);
   }
 
-  return value;
+  return evaluateMethod(object, key, value, {params, isOptional}, options);
+}
+
+function evaluateAttribute(object, key, value, {authorizer}) {
+  return possiblyAsync(evaluateAuthorizer(object, authorizer, key, 'get'), isAllowed => {
+    if (!isAllowed) {
+      throw new Error(`Cannot get the value of an attribute that is not allowed (name: '${key}')`);
+    }
+    return value;
+  });
+}
+
+// eslint-disable-next-line max-params
+function evaluateMethod(object, key, method, {params, isOptional}, {context, authorizer}) {
+  if (method === undefined) {
+    if (isOptional) {
+      return undefined;
+    }
+    throw new Error(`Couldn't found a method matching the key '${key}'`);
+  }
+
+  return possiblyAsync(evaluateAuthorizer(object, authorizer, key, 'call'), isAllowed => {
+    if (!isAllowed) {
+      throw new Error(`Cannot execute a method that is not allowed (name: '${key}')`);
+    }
+    return method.call(object, ...(params || []), context);
+  });
+}
+
+function evaluateAuthorizer(object, authorizer, key, operation) {
+  if (authorizer === undefined) {
+    return true;
+  }
+
+  return authorizer.call(object, key, operation);
 }

@@ -55,7 +55,7 @@ import {invokeQuery} from '@deepr/runtime';
 
 ## API
 
-### `invokeQuery(root, query, [options])`
+### `invokeQuery(root, query, [options]) => result`
 
 Invoke the specified `query` on `root`, and return the result of the invocation. If a promise is encountered during the execution, then a promise that resolves with the result is returned.
 
@@ -142,6 +142,32 @@ Example:
 If `true` (the default), all JavaScript built-in keys will be ignored. This includes object and function built-in keys such as `constructor`, `prototype`, `apply`, `caller`, `__proto__`, `hasOwnProperty`, etc. Even if they are built-in, the keys `name` and `length` are considered safe, and therefore accepted.
 
 For obvious security reasons, it is strongly discouraged to disable this option.
+
+##### `authorizer(key, operation) => boolean`
+
+A function that is called for each key to authorize any operation.
+
+The function receives a `key` and an `operation` which can be either `'get'` for reading an attribute or `'call'` for invoking a method.
+
+The function must return `true` to authorize an operation. If `false` is returned, the evaluation of the query stops immediately, and an error is thrown.
+
+The function can be either synchronous or asynchronous (using `async` or returning a promise).
+
+Finally, the value of `this` in the function is the current node of the query being evaluated.
+
+Example:
+
+```js
+function authorizer(key, operation) {
+  if (key === 'title' && operation === 'get') {
+    return true; // Authorize getting the 'title' attribute
+  }
+  if (key === 'get' && operation === 'call') {
+    return true; // Authorize invoking the get() method
+  }
+  return false; // Decline everything else
+}
+```
 
 ## Contribute
 

@@ -4,7 +4,7 @@ import {invokeExpression} from './runtime';
 export function invokeQuery(
   root,
   query,
-  {context, ignoreKeys, acceptKeys, ignoreBuiltInKeys} = {}
+  {context, ignoreKeys, acceptKeys, ignoreBuiltInKeys, authorizer} = {}
 ) {
   if (root === undefined) {
     throw new Error(`'root' parameter is missing`);
@@ -15,6 +15,7 @@ export function invokeQuery(
   }
 
   return invokeExpression(root, parseQuery(query, {ignoreKeys, acceptKeys, ignoreBuiltInKeys}), {
-    context
+    context,
+    authorizer
   });
 }

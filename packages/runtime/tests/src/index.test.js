@@ -141,9 +141,9 @@ describe('@deepr/runtime', () => {
   });
 
   describe('Parameters', () => {
-    test('Call a function with multiple parameters', async () => {
+    test('Call a function with multiple parameters', () => {
       expect(
-        await invokeQuery(
+        invokeQuery(
           {
             sum(a, b) {
               return a + b;
@@ -154,40 +154,40 @@ describe('@deepr/runtime', () => {
       ).toEqual({sum: 3});
     });
 
-    test('Call a static method of a class', async () => {
+    test('Call a static method of a class', () => {
       class Movies {
         static count() {
           return 2;
         }
       }
-      expect(await invokeQuery({Movies}, {Movies: {count: {'()': []}}})).toEqual({
+      expect(invokeQuery({Movies}, {Movies: {count: {'()': []}}})).toEqual({
         Movies: {count: 2}
       });
     });
 
-    test('Get an attribute of a method', async () => {
+    test('Get an attribute of a method', () => {
       class Movies {
         static count() {
           return 2;
         }
       }
       Movies.count.route = '/movies/count';
-      expect(await invokeQuery({Movies}, {Movies: {count: {route: true}}})).toEqual({
+      expect(invokeQuery({Movies}, {Movies: {count: {route: true}}})).toEqual({
         Movies: {count: {route: '/movies/count'}}
       });
     });
   });
 
   describe('Keys', () => {
-    test('"key" variant', async () => {
+    test('"key" variant', () => {
       expect(
-        await invokeQuery({movie: {title: 'Inception', year: 2010}}, {movie: {title: true}})
+        invokeQuery({movie: {title: 'Inception', year: 2010}}, {movie: {title: true}})
       ).toEqual({movie: {title: 'Inception'}});
     });
 
-    test('"sourceKey=>targetKey" variant', async () => {
+    test('"sourceKey=>targetKey" variant', () => {
       expect(
-        await invokeQuery(
+        invokeQuery(
           {
             movies({filter: {genre}}) {
               if (genre === 'action') {
@@ -209,9 +209,9 @@ describe('@deepr/runtime', () => {
       });
     });
 
-    test('"=>targetKey" variant', async () => {
+    test('"=>targetKey" variant', () => {
       expect(
-        await invokeQuery(
+        invokeQuery(
           {
             movies: {
               * [Symbol.iterator]() {
@@ -233,13 +233,13 @@ describe('@deepr/runtime', () => {
       });
     });
 
-    test('"sourceKey=>" variant', async () => {
+    test('"sourceKey=>" variant', () => {
       expect(
-        await invokeQuery({movie: {title: 'Inception', year: 2010}}, {movie: {'title=>': true}})
+        invokeQuery({movie: {title: 'Inception', year: 2010}}, {movie: {'title=>': true}})
       ).toEqual({movie: 'Inception'});
     });
 
-    test('"=>" variant', async () => {
+    test('"=>" variant', () => {
       const object = {
         movie({id}) {
           if (id === 'cjrts72gy00ik01rv6eins4se') {
@@ -249,13 +249,13 @@ describe('@deepr/runtime', () => {
       };
 
       expect(
-        await invokeQuery(object, {
+        invokeQuery(object, {
           movie: {'()': [{id: 'cjrts72gy00ik01rv6eins4se'}], '=>': {title: true, year: true}}
         })
       ).toEqual({movie: {title: 'Inception', year: 2010}});
 
       expect(
-        await invokeQuery(object, {
+        invokeQuery(object, {
           movie: {'()': [{id: 'cjrts72gy00ik01rv6eins4se'}], title: true, year: true}
         })
       ).toEqual({movie: {title: 'Inception', year: 2010}});
@@ -263,27 +263,27 @@ describe('@deepr/runtime', () => {
   });
 
   describe('Values', () => {
-    test('Boolean `true`', async () => {
+    test('Boolean `true`', () => {
       expect(
-        await invokeQuery(
+        invokeQuery(
           {movie: {title: 'Inception', year: 2010, country: 'USA'}},
           {movie: {title: true, year: true}}
         )
       ).toEqual({movie: {title: 'Inception', year: 2010}});
     });
 
-    test('Object', async () => {
+    test('Object', () => {
       expect(
-        await invokeQuery(
+        invokeQuery(
           {movie: {title: 'Star Wars', director: {name: 'Georges Lucas', popularity: 70}}},
           {movie: {director: {name: true}}}
         )
       ).toEqual({movie: {director: {name: 'Georges Lucas'}}});
     });
 
-    test('Array', async () => {
+    test('Array', () => {
       expect(
-        await invokeQuery(
+        invokeQuery(
           {movies: [{title: 'Inception'}, {title: 'The Matrix'}, {title: 'Forest Gump'}]},
           {movies: [{title: true}]}
         )
@@ -373,9 +373,9 @@ describe('@deepr/runtime', () => {
   });
 
   describe('Source values', () => {
-    test('Call a method on an object', async () => {
+    test('Call a method on an object', () => {
       expect(
-        await invokeQuery(
+        invokeQuery(
           {},
           {
             '<=': {
@@ -402,9 +402,9 @@ describe('@deepr/runtime', () => {
   });
 
   describe('Options', () => {
-    test('context', async () => {
+    test('context', () => {
       expect(
-        await invokeQuery(
+        invokeQuery(
           {
             movie({id}, {accessToken}) {
               if (accessToken !== 'super-secret-token') {
@@ -424,9 +424,9 @@ describe('@deepr/runtime', () => {
       ).toEqual({movie: {title: 'Inception'}});
     });
 
-    test('ignoreKeys', async () => {
+    test('ignoreKeys', () => {
       expect(
-        await invokeQuery(
+        invokeQuery(
           {
             user: {
               username: 'steve',
@@ -444,9 +444,9 @@ describe('@deepr/runtime', () => {
       ).toEqual({user: {username: 'steve'}});
     });
 
-    test('acceptKeys', async () => {
+    test('acceptKeys', () => {
       expect(
-        await invokeQuery(
+        invokeQuery(
           {
             user: {
               _id: 'abc123',
@@ -462,7 +462,7 @@ describe('@deepr/runtime', () => {
       ).toEqual({user: {_id: 'abc123', username: 'steve'}});
     });
 
-    test('ignoreBuiltInKeys', async () => {
+    test('ignoreBuiltInKeys', () => {
       const root = {
         user: {
           username: 'steve'
@@ -473,13 +473,82 @@ describe('@deepr/runtime', () => {
         user: {username: true, hasOwnProperty: {'()': ['username']}}
       };
 
-      expect(await invokeQuery(root, query)).toEqual({
+      expect(invokeQuery(root, query)).toEqual({
         user: {username: 'steve'}
       });
 
-      expect(await invokeQuery(root, query, {ignoreBuiltInKeys: false})).toEqual({
+      expect(invokeQuery(root, query, {ignoreBuiltInKeys: false})).toEqual({
         user: {username: 'steve', hasOwnProperty: true}
       });
+    });
+
+    test('authorizer', () => {
+      const root = {
+        user: {
+          username: 'steve',
+          password: 'secret',
+          publicMethod() {
+            return 'public information';
+          },
+          privateMethod() {
+            return 'private information';
+          }
+        }
+      };
+
+      const options = {
+        authorizer(key, operation) {
+          if (key === 'user' && operation === 'get') {
+            return true;
+          }
+          if (key === 'username' && operation === 'get') {
+            return true;
+          }
+          if (key === 'publicMethod' && operation === 'call') {
+            return true;
+          }
+          return false;
+        }
+      };
+
+      expect(
+        invokeQuery(
+          root,
+          {
+            user: {
+              username: true,
+              publicMethod: {'()': []}
+            }
+          },
+          options
+        )
+      ).toEqual({user: {username: 'steve', publicMethod: 'public information'}});
+
+      expect(() =>
+        invokeQuery(
+          root,
+          {
+            user: {
+              username: true,
+              password: true
+            }
+          },
+          options
+        )
+      ).toThrow('Cannot get the value of an attribute that is not allowed');
+
+      expect(() =>
+        invokeQuery(
+          root,
+          {
+            user: {
+              publicMethod: {'()': []},
+              privateMethod: {'()': []}
+            }
+          },
+          options
+        )
+      ).toThrow('Cannot execute a method that is not allowed');
     });
   });
 });
