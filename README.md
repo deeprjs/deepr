@@ -86,9 +86,9 @@ Let's start with a simple query:
 }
 ```
 
-Here we are invoking a method called `movie` in the top-level context (the "root").
+Here we are querying an object called `movie` in the top-level context (the "root").
 
-Then, inside the context of `movie`, we are calling `title` and `year` attributes.
+Then, inside the context of `movie`, we are getting `title` and `year` fields.
 
 The response will be:
 
@@ -101,7 +101,7 @@ The response will be:
 }
 ```
 
-So far, it looks like GraphQL. Since we are using JSON objects, the only significant difference is that we must specify a value for the keys `title` and `year`. Specifying `true` means that we want to return or invoke the corresponding field or method.
+So far, it looks like GraphQL. Since we are using JSON objects, the only significant difference is that we must specify a value for the keys `title` and `year`. Specifying `true` means that we want to return the corresponding field.
 
 Instead of querying a single movie, let's query a collection of movies:
 
@@ -113,7 +113,7 @@ Instead of querying a single movie, let's query a collection of movies:
 }
 ```
 
-Nothing surprising here, we are just executing the `count` method on the `movies` collection. The query will return:
+Nothing surprising here, we are just querying the `count` field on the `movies` collection. The query will return:
 
 ```json
 {
@@ -189,14 +189,14 @@ Using the key `"=>items"` means that we take the current context (the collection
 }
 ```
 
-### Parameters
+### Method invocation
 
-When executing a method, it is often useful to pass some parameters. Here is how you can do that:
+So far, we have seen how to query fields. Let's now see how to invoke methods:
 
 ```json
 {
-  "movies": {
-    "()": {"filter": {"year": 2010}, "limit": 1},
+  "getMovies": {
+    "()": [{"filter": {"year": 2010}, "limit": 1}],
     "=>": [
       {
         "title": true
@@ -206,32 +206,17 @@ When executing a method, it is often useful to pass some parameters. Here is how
 }
 ```
 
-The `()` key allows passing parameters to the `movies` method.
+The `()` key indicates that we want to invoke the `getMovies` method with the parameters specified in the corresponding array.
 
 We get the following result:
 
 ```json
 {
-  "movies": [
+  "getMovies": [
     {
       "title": "Inception"
     }
   ]
-}
-```
-
-To pass **multiple parameters**, use the `([])` key and enclose the parameters in an array. For example:
-
-```json
-{
-  "movie": {
-    "([])": [{"id": "cjrts72gy00ik01rv6eins4se"}, {"throwIfNotFound": true}],
-    "=>": [
-      {
-        "title": true
-      }
-    ]
-  }
 }
 ```
 
@@ -275,26 +260,26 @@ Not surprisingly, this will return something like this:
 
 If source and target are different, the result of the evaluation of `sourceKey` will appear under a key called `targetKey` in the response.
 
-For example `createdAt=>date` key means the `createdAt` field (or method) result will appear under a key called `date` in the response.
+For example `createdAt=>date` key means the `createdAt` field value will appear under a key called `date` in the response.
 
 You can think about it as a way to create aliases, similarly to the GraphQL's [aliasing feature](https://graphql.org/learn/queries/#aliases).
 
 By using aliases, it is possible to execute a method more than once with different parameters, avoiding name collisions inside the result.
 
-For example, in the following query, we first call the `movies` method and assign the result to `actionMovies`, then we call the same `movies` method, with different parameters, and assign the result to `dramaMovies`.
+For example, in the following query, we first call the `getMovies` method and assign the result to `actionMovies`, then we call the same `getMovies` method, with different parameters, and assign the result to `dramaMovies`.
 
 ```json
 {
-  "movies=>actionMovies": {
-    "()": {"filter": {"genre": "action"}},
+  "getMovies=>actionMovies": {
+    "()": [{"filter": {"genre": "action"}}],
     "=>": [
       {
         "title": true
       }
     ]
   },
-  "movies=>dramaMovies": {
-    "()": {"filter": {"genre": "drama"}},
+  "getMovies=>dramaMovies": {
+    "()": [{"filter": {"genre": "drama"}}],
     "=>": [
       {
         "title": true
@@ -391,12 +376,12 @@ In this case, we do not process the current context (no source) and we are not c
 
 The `=>` can be interpreted as a way to introduce the result of a function call.
 
-In the following query, we retrieve a movie by its `id`, and we return `title` and `year` attributes in the response.
+In the following query, we retrieve a movie by its `id`, and we return `title` and `year` fields in the response.
 
 ```json
 {
-  "movie": {
-    "()": {"id": "cjrts72gy00ik01rv6eins4se"},
+  "getMovie": {
+    "()": ["cjrts72gy00ik01rv6eins4se"],
     "=>": {"title": true, "year": true}
   }
 }
@@ -406,8 +391,8 @@ Note that the following query is exactly the same:
 
 ```json
 {
-  "movie": {
-    "()": {"id": "cjrts72gy00ik01rv6eins4se"},
+  "getMovie": {
+    "()": ["cjrts72gy00ik01rv6eins4se"],
     "title": true,
     "year": true
   }
@@ -418,7 +403,7 @@ Both queries will produce the following response:
 
 ```json
 {
-  "movie": {
+  "getMovie": {
     "title": "Inception",
     "year": 2010
   }
@@ -429,8 +414,8 @@ This feature is particularly useful to access the elements of a collection. For 
 
 ```json
 {
-  "movies": {
-    "()": {"filter": {"country": "USA"}},
+  "getMovies": {
+    "()": [{"filter": {"country": "USA"}}],
     "=>": [
       {
         "title": true
@@ -444,7 +429,7 @@ will output:
 
 ```json
 {
-  "movies": [{"title": "Inception"}, {"title": "The Matrix"}, {"title": "Forest Gump"}]
+  "getMovies": [{"title": "Inception"}, {"title": "The Matrix"}, {"title": "Forest Gump"}]
 }
 ```
 
@@ -460,7 +445,7 @@ Let's see how Deepr handles these three types of values.
 
 #### Boolean `true`
 
-The boolean `true` means the result of the method or the field will be included as is in the response.
+The boolean `true` means the value of a field will be included as is in the response.
 
 If we query a single movie this way:
 
@@ -563,13 +548,13 @@ Now, let's put into practice what we have just seen to compose a more complex qu
 {
   "movies": {
     "filter=>": {
-      "()": {"country": "USA"},
+      "()": [{"country": "USA"}],
       "sort=>": {
-        "()": {"by": "year"},
+        "()": [{"by": "year"}],
         "skip=>": {
-          "()": 5,
+          "()": [5],
           "limit=>": {
-            "()": 10,
+            "()": [10],
             "=>": [
               {
                 "title": true,
@@ -613,7 +598,7 @@ Here is how we could create a record:
 {
   "movies=>": {
     "create=>movie": {
-      "()": {"title": "Avatar", "country": "USA"},
+      "()": [{"title": "Avatar", "country": "USA"}],
       "=>": {"id": true}
     }
   }
@@ -638,9 +623,11 @@ Now that we have added a movie, let's retrieve it:
 
 ```json
 {
-  "movie": {
-    "()": {"id": "cjrts72gy00ik01rv6eins4se"},
-    "=>": {"id": true, "title": true, "country": true}
+  "movies=>": {
+    "get=>movie": {
+      "()": [{"id": "cjrts72gy00ik01rv6eins4se"}],
+      "=>": {"id": true, "title": true, "country": true}
+    }
   }
 }
 ```
@@ -659,11 +646,13 @@ To modify a record, we can do this with:
 
 ```json
 {
-  "movie": {
-    "()": {"id": "cjrts72gy00ik01rv6eins4se"},
-    "update=>": {
-      "()": {"rating": 8.1},
-      "=>": {"id": true}
+  "movies=>": {
+    "get=>movie": {
+      "()": [{"id": "cjrts72gy00ik01rv6eins4se"}],
+      "update=>": {
+        "()": [{"rating": 8.1}],
+        "=>": {"id": true}
+      }
     }
   }
 }
@@ -685,9 +674,14 @@ Finally, here is how we can delete a record:
 
 ```json
 {
-  "movie": {
-    "()": {"id": "cjrts72gy00ik01rv6eins4se"},
-    "delete=>": {"id": true}
+  "movies=>": {
+    "get=>movie": {
+      "()": [{"id": "cjrts72gy00ik01rv6eins4se"}],
+      "delete=>": {
+        "()": [],
+        "id": true
+      }
+    }
   }
 }
 ```
@@ -712,6 +706,7 @@ Using this feature, the previous example for creating a movie could be written a
 {
   "<=": {"_type": "Movie", "title": "Avatar", "country": "USA"},
   "save=>movie": {
+    "()": [],
     "id": true
   }
 }
@@ -729,19 +724,18 @@ As before, this will return:
 
 ### Relations
 
-This guide would not be complete without mentioning another important feature: the ability to query relationships between collections.
-It is actually pretty straightforward. Here is how we can fetch some movies with their related actors:
+This guide would not be complete without demonstrating another common use case: the ability to query relationships between collections. It is actually pretty straightforward. Here is how we can fetch some movies with their related actors:
 
 ```json
 {
-  "movies": {
-    "()": {"filter": {"country": "USA"}},
+  "getMovies=>movies": {
+    "()": [{"filter": {"country": "USA"}}],
     "=>": [
       {
         "title": true,
         "year": true,
-        "actors": {
-          "()": {"sort": {"by": "popularity"}, "limit": 2},
+        "getActors=>actors": {
+          "()": [{"sort": {"by": "popularity"}, "limit": 2}],
           "=>": [
             {
               "fullName": true,

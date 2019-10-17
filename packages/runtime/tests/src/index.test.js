@@ -27,7 +27,7 @@ describe('@deepr/runtime', () => {
                 }
               }
             },
-            {movies: {count: true}}
+            {movies: {count: {'()': []}}}
           )
         ).toEqual({
           movies: {count: 2}
@@ -57,7 +57,7 @@ describe('@deepr/runtime', () => {
                 }
               }
             },
-            {movies: {count: true, '=>items': [{title: true, year: true}]}}
+            {movies: {count: {'()': []}, '=>items': [{title: true, year: true}]}}
           )
         ).toEqual({
           movies: {
@@ -93,7 +93,7 @@ describe('@deepr/runtime', () => {
                 }
               }
             },
-            {movies: {count: true}}
+            {movies: {count: {'()': []}}}
           )
         ).toEqual({
           movies: {count: 2}
@@ -128,7 +128,7 @@ describe('@deepr/runtime', () => {
                 }
               }
             },
-            {movies: {count: true, '=>items': [{title: true, year: true}]}}
+            {movies: {count: {'()': []}, '=>items': [{title: true, year: true}]}}
           )
         ).toEqual({
           movies: {
@@ -141,22 +141,6 @@ describe('@deepr/runtime', () => {
   });
 
   describe('Parameters', () => {
-    test('Call a function with one parameter', async () => {
-      expect(
-        await invokeQuery(
-          {
-            movies({filter: {year}, limit}) {
-              if (year === 2010 && limit === 1) {
-                return [{title: 'Inception'}];
-              }
-              return [{title: 'Inception'}, {title: 'The Matrix'}];
-            }
-          },
-          {movies: {'()': {filter: {year: 2010}, limit: 1}, '=>': [{title: true}]}}
-        )
-      ).toEqual({movies: [{title: 'Inception'}]});
-    });
-
     test('Call a function with multiple parameters', async () => {
       expect(
         await invokeQuery(
@@ -165,32 +149,31 @@ describe('@deepr/runtime', () => {
               return a + b;
             }
           },
-          {sum: {'([])': [1, 2]}}
+          {sum: {'()': [1, 2]}}
         )
       ).toEqual({sum: 3});
     });
 
-    test('Call a function without specifying parameters', async () => {
-      expect(
-        await invokeQuery(
-          {
-            movies() {
-              return [{title: 'Inception'}];
-            }
-          },
-          {movies: [{title: true}]}
-        )
-      ).toEqual({movies: [{title: 'Inception'}]});
-    });
-
-    test('Specify a class without specifying parameters', async () => {
+    test('Call a static method of a class', async () => {
       class Movies {
         static count() {
           return 2;
         }
       }
-      expect(await invokeQuery({Movies}, {Movies: {count: true}})).toEqual({
+      expect(await invokeQuery({Movies}, {Movies: {count: {'()': []}}})).toEqual({
         Movies: {count: 2}
+      });
+    });
+
+    test('Get an attribute of a method', async () => {
+      class Movies {
+        static count() {
+          return 2;
+        }
+      }
+      Movies.count.route = '/movies/count';
+      expect(await invokeQuery({Movies}, {Movies: {count: {route: true}}})).toEqual({
+        Movies: {count: {route: '/movies/count'}}
       });
     });
   });
@@ -216,8 +199,8 @@ describe('@deepr/runtime', () => {
             }
           },
           {
-            'movies=>actionMovies': {'()': {filter: {genre: 'action'}}, '=>': [{title: true}]},
-            'movies=>dramaMovies': {'()': {filter: {genre: 'drama'}}, '=>': [{title: true}]}
+            'movies=>actionMovies': {'()': [{filter: {genre: 'action'}}], '=>': [{title: true}]},
+            'movies=>dramaMovies': {'()': [{filter: {genre: 'drama'}}], '=>': [{title: true}]}
           }
         )
       ).toEqual({
@@ -240,7 +223,7 @@ describe('@deepr/runtime', () => {
               }
             }
           },
-          {movies: {count: true, '=>items': [{title: true}]}}
+          {movies: {count: {'()': []}, '=>items': [{title: true}]}}
         )
       ).toEqual({
         movies: {
@@ -267,13 +250,13 @@ describe('@deepr/runtime', () => {
 
       expect(
         await invokeQuery(object, {
-          movie: {'()': {id: 'cjrts72gy00ik01rv6eins4se'}, '=>': {title: true, year: true}}
+          movie: {'()': [{id: 'cjrts72gy00ik01rv6eins4se'}], '=>': {title: true, year: true}}
         })
       ).toEqual({movie: {title: 'Inception', year: 2010}});
 
       expect(
         await invokeQuery(object, {
-          movie: {'()': {id: 'cjrts72gy00ik01rv6eins4se'}, title: true, year: true}
+          movie: {'()': [{id: 'cjrts72gy00ik01rv6eins4se'}], title: true, year: true}
         })
       ).toEqual({movie: {title: 'Inception', year: 2010}});
     });
@@ -334,14 +317,14 @@ describe('@deepr/runtime', () => {
         expect(() =>
           invokeQuery(
             {movie: {title: 'Inception'}},
-            {movie: {title: true, actors: {'()': {sort: {by: 'popularity'}}}}}
+            {movie: {title: true, actors: {'()': [{sort: {by: 'popularity'}}]}}}
           )
         ).toThrow(/Couldn't found a method matching the key/);
 
         expect(
           invokeQuery(
             {movie: {title: 'Inception'}},
-            {movie: {title: true, 'actors?': {'()': {sort: {by: 'popularity'}}}}}
+            {movie: {title: true, 'actors?': {'()': [{sort: {by: 'popularity'}}]}}}
           )
         ).toEqual({movie: {title: 'Inception'}});
       });
@@ -375,14 +358,14 @@ describe('@deepr/runtime', () => {
         await expect(
           invokeQuery(
             {movie: makePromise({title: 'Inception'})},
-            {movie: {title: true, actors: {'()': {sort: {by: 'popularity'}}}}}
+            {movie: {title: true, actors: {'()': [{sort: {by: 'popularity'}}]}}}
           )
         ).rejects.toThrow();
 
         await expect(
           invokeQuery(
             {movie: makePromise({title: 'Inception'})},
-            {movie: {title: true, 'actors?': {'()': {sort: {by: 'popularity'}}}}}
+            {movie: {title: true, 'actors?': {'()': [{sort: {by: 'popularity'}}]}}}
           )
         ).resolves.toEqual({movie: {title: 'Inception'}});
       });
@@ -405,6 +388,7 @@ describe('@deepr/runtime', () => {
               }
             },
             'save=>movie': {
+              '()': [],
               id: true
             }
           }
@@ -433,7 +417,7 @@ describe('@deepr/runtime', () => {
             }
           },
           {
-            movie: {'()': {id: 'cjrts72gy00ik01rv6eins4se'}, '=>': {title: true}}
+            movie: {'()': [{id: 'cjrts72gy00ik01rv6eins4se'}], '=>': {title: true}}
           },
           {context: {accessToken: 'super-secret-token'}}
         )
@@ -453,7 +437,7 @@ describe('@deepr/runtime', () => {
             }
           },
           {
-            user: {username: true, password: true, _privateMethod: true}
+            user: {username: true, password: true, _privateMethod: {'()': []}}
           },
           {ignoreKeys: ['password', /^_/]}
         )
@@ -486,7 +470,7 @@ describe('@deepr/runtime', () => {
       };
 
       const query = {
-        user: {username: true, hasOwnProperty: {'()': 'username'}}
+        user: {username: true, hasOwnProperty: {'()': ['username']}}
       };
 
       expect(await invokeQuery(root, query)).toEqual({
