@@ -3,14 +3,12 @@ parseQuery(query) => expression
 
 Transform a query:
 {
-  "movies=>actionMovies": {
-    "()": {"genre": "action"},
-    "reverse=>": [
-      {
-        "title": true,
-        "year": true
-      }
-    ]
+  "getMovies=>actionMovies": {
+    "()": [{"genre": "action"}],
+    "reverse=>": {
+      "()": [],
+      "=>" [{"title": true, "year": true}]
+    }
   }
 }
 
@@ -19,10 +17,11 @@ Into an expression that is easier to execute by the runtime:
   "sourceKey": "",
   "nestedExpressions": {
     "actionMovies": {
-      "sourceKey": "movies",
-      "params": {"genre": "action"},
+      "sourceKey": "getMovies",
+      "params": [{"genre": "action"}],
       "nextExpression": {
         "sourceKey": "reverse",
+        "params": [],
         "useCollectionElements": true,
         "nestedExpressions": {
           "title": {
@@ -95,13 +94,8 @@ function _parseQuery(
       if (params !== undefined) {
         throw new Error('Multiple parameters found at the same level');
       }
-      params = [value];
-      continue;
-    }
-
-    if (key === '([])') {
-      if (params !== undefined) {
-        throw new Error('Multiple parameters found at the same level');
+      if (!Array.isArray(value)) {
+        throw new Error('Parameters must be specified in an array');
       }
       params = value;
       continue;

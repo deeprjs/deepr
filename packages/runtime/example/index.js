@@ -4,7 +4,7 @@ const {invokeQuery} = require('..');
 
 (async () => {
   const root = {
-    async movie({id}) {
+    async getMovie({id}) {
       if (id === 'abc123') {
         return {
           title: 'Inception',
@@ -21,8 +21,8 @@ const {invokeQuery} = require('..');
   };
 
   const result = await invokeQuery(root, {
-    movie: {
-      '()': {id: 'abc123'},
+    'getMovie=>movie': {
+      '()': [{id: 'abc123'}],
       '=>': {
         title: true,
         actors: [{fullName: true}]
