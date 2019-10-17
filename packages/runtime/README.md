@@ -16,7 +16,7 @@ import {invokeQuery} from '@deepr/runtime';
 (async () => {
   // Given the following "root" object:
   const root = {
-    async movie({id}) {
+    async getMovie(id) {
       // Let's pretend we are reading a record from a database
       if (id === 'abc123') {
         return {
@@ -34,8 +34,8 @@ import {invokeQuery} from '@deepr/runtime';
 
   // Invoking the following query:
   await invokeQuery(root, {
-    movie: {
-      '()': {id: 'abc123'},
+    'getMovie=>movie': {
+      '()': ['abc123'],
       '=>': {
         title: true,
         actors: [{fullName: true}]
