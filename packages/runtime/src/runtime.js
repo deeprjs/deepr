@@ -65,31 +65,18 @@ function _invokeExpression(
 function evaluateKey(object, {key, params, isOptional}, options) {
   const value = object[key];
 
-  const isFunction = typeof value === 'function';
-  const isClass = startsWithUpperCase(key);
-  if ((isFunction && !isClass) || params) {
-    const func = value;
+  if (params !== undefined) {
+    const method = value;
 
-    if (func === undefined) {
+    if (method === undefined) {
       if (isOptional) {
         return undefined;
       }
       throw new Error(`Couldn't found a method matching the key '${key}'`);
     }
 
-    if (!isFunction) {
-      throw new Error(
-        `A function was expected but found a value of type '${typeof func}' (key: '${key}')`
-      );
-    }
-
-    return func.call(object, ...(params || []), options.context);
+    return method.call(object, ...(params || []), options.context);
   }
 
   return value;
-}
-
-function startsWithUpperCase(string) {
-  const firstCharacter = string.substr(0, 1);
-  return firstCharacter.toUpperCase() === firstCharacter;
 }
