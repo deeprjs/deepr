@@ -27,38 +27,40 @@ function _invokeExpression(
 ) {
   object = sourceKey ? evaluateKey(object, sourceKey, {params, isOptional}, options) : object;
 
-  return possiblyAsync(object, function (object) {
-    if (sourceValue !== undefined) {
-      object = sourceValue;
-    }
-
-    if (!(nestedExpressions || nextExpression)) {
-      return object;
-    }
-
-    if (object === undefined) {
-      if (isOptional) {
-        return undefined;
+  return possiblyAsync(object, {
+    then(object) {
+      if (sourceValue !== undefined) {
+        object = sourceValue;
       }
-      throw new Error(`Cannot execute a query on \`undefined\` (key: '${sourceKey}')`);
-    }
 
-    if (useCollectionElements) {
-      const collection = object;
-      const results = possiblyAsync.map(collection, function (object) {
-        return _invokeExpression(object, {nestedExpressions, nextExpression}, options);
+      if (!(nestedExpressions || nextExpression)) {
+        return object;
+      }
+
+      if (object === undefined) {
+        if (isOptional) {
+          return undefined;
+        }
+        throw new Error(`Cannot execute a query on \`undefined\` (key: '${sourceKey}')`);
+      }
+
+      if (useCollectionElements) {
+        const collection = object;
+        const results = possiblyAsync.map(collection, function (object) {
+          return _invokeExpression(object, {nestedExpressions, nextExpression}, options);
+        });
+        return results;
+      }
+
+      if (nextExpression) {
+        return _invokeExpression(object, nextExpression, options);
+      }
+
+      const results = possiblyAsync.mapObject(nestedExpressions, function (nestedExpression) {
+        return _invokeExpression(object, nestedExpression, options);
       });
       return results;
     }
-
-    if (nextExpression) {
-      return _invokeExpression(object, nextExpression, options);
-    }
-
-    const results = possiblyAsync.mapObject(nestedExpressions, function (nestedExpression) {
-      return _invokeExpression(object, nestedExpression, options);
-    });
-    return results;
   });
 }
 
@@ -73,11 +75,15 @@ function evaluateKey(object, key, {params, isOptional}, options) {
 }
 
 function evaluateAttribute(object, key, value, {authorizer}) {
-  return possiblyAsync(evaluateAuthorizer(object, authorizer, key, 'get'), isAllowed => {
-    if (!isAllowed) {
-      throw new Error(`Cannot get the value of an attribute that is not allowed (name: '${key}')`);
+  return possiblyAsync(evaluateAuthorizer(object, authorizer, key, 'get'), {
+    then(isAllowed) {
+      if (!isAllowed) {
+        throw new Error(
+          `Cannot get the value of an attribute that is not allowed (name: '${key}')`
+        );
+      }
+      return value;
     }
-    return value;
   });
 }
 
@@ -90,11 +96,13 @@ function evaluateMethod(object, key, method, {params, isOptional}, {context, aut
     throw new Error(`Couldn't found a method matching the key '${key}'`);
   }
 
-  return possiblyAsync(evaluateAuthorizer(object, authorizer, key, 'call'), isAllowed => {
-    if (!isAllowed) {
-      throw new Error(`Cannot execute a method that is not allowed (name: '${key}')`);
+  return possiblyAsync(evaluateAuthorizer(object, authorizer, key, 'call'), {
+    then(isAllowed) {
+      if (!isAllowed) {
+        throw new Error(`Cannot execute a method that is not allowed (name: '${key}')`);
+      }
+      return method.call(object, ...(params || []), context);
     }
-    return method.call(object, ...(params || []), context);
   });
 }
 
