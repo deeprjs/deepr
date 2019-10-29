@@ -96,20 +96,21 @@ function evaluateMethod(object, key, method, {params, isOptional}, {context, aut
     throw new Error(`Couldn't found a method matching the key '${key}'`);
   }
 
-  return possiblyAsync(evaluateAuthorizer(object, authorizer, key, 'call'), {
+  return possiblyAsync(evaluateAuthorizer(object, authorizer, key, 'call', params), {
     then(isAllowed) {
       if (!isAllowed) {
         throw new Error(`Cannot execute a method that is not allowed (name: '${key}')`);
       }
-      return method.call(object, ...(params || []), context);
+      return method.call(object, ...params, context);
     }
   });
 }
 
-function evaluateAuthorizer(object, authorizer, key, operation) {
+// eslint-disable-next-line max-params
+function evaluateAuthorizer(object, authorizer, key, operation, params) {
   if (authorizer === undefined) {
     return true;
   }
 
-  return authorizer.call(object, key, operation);
+  return authorizer.call(object, key, operation, params);
 }
