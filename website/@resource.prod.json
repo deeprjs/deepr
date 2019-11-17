@@ -1,0 +1,7 @@
+{
+  "@load": "./@resource.json",
+  "domainName": "deepr.io",
+  "aws": {
+    "region": "us-west-2"
+  }
+}
