@@ -37,10 +37,20 @@ describe('@deepr/runtime', () => {
       test('Get attributes of collection elements', () => {
         expect(
           invokeQuery(
-            {movies: [{title: 'Inception', year: 2010}, {title: 'The Matrix', year: 1999}]},
+            {
+              movies: [
+                {title: 'Inception', year: 2010},
+                {title: 'The Matrix', year: 1999}
+              ]
+            },
             {movies: [{title: true, year: true}]}
           )
-        ).toEqual({movies: [{title: 'Inception', year: 2010}, {title: 'The Matrix', year: 1999}]});
+        ).toEqual({
+          movies: [
+            {title: 'Inception', year: 2010},
+            {title: 'The Matrix', year: 1999}
+          ]
+        });
       });
 
       test('Call a method on a collection and get attributes of collection elements', () => {
@@ -48,7 +58,7 @@ describe('@deepr/runtime', () => {
           invokeQuery(
             {
               movies: {
-                * [Symbol.iterator]() {
+                *[Symbol.iterator]() {
                   yield {title: 'Inception', year: 2010};
                   yield {title: 'The Matrix', year: 1999};
                 },
@@ -57,12 +67,15 @@ describe('@deepr/runtime', () => {
                 }
               }
             },
-            {movies: {count: {'()': []}, '=>items': [{title: true, year: true}]}}
+            {movies: {'count': {'()': []}, '=>items': [{title: true, year: true}]}}
           )
         ).toEqual({
           movies: {
             count: 2,
-            items: [{title: 'Inception', year: 2010}, {title: 'The Matrix', year: 1999}]
+            items: [
+              {title: 'Inception', year: 2010},
+              {title: 'The Matrix', year: 1999}
+            ]
           }
         });
       });
@@ -111,7 +124,12 @@ describe('@deepr/runtime', () => {
             },
             {movies: [{title: true, year: true}]}
           )
-        ).toEqual({movies: [{title: 'Inception', year: 2010}, {title: 'The Matrix', year: 1999}]});
+        ).toEqual({
+          movies: [
+            {title: 'Inception', year: 2010},
+            {title: 'The Matrix', year: 1999}
+          ]
+        });
       });
 
       test('Call a method on a collection and get attributes of collection elements', async () => {
@@ -119,7 +137,7 @@ describe('@deepr/runtime', () => {
           await invokeQuery(
             {
               movies: {
-                * [Symbol.iterator]() {
+                *[Symbol.iterator]() {
                   yield makePromise({title: 'Inception', year: 2010});
                   yield makePromise({title: 'The Matrix', year: 1999});
                 },
@@ -128,12 +146,15 @@ describe('@deepr/runtime', () => {
                 }
               }
             },
-            {movies: {count: {'()': []}, '=>items': [{title: true, year: true}]}}
+            {movies: {'count': {'()': []}, '=>items': [{title: true, year: true}]}}
           )
         ).toEqual({
           movies: {
             count: 2,
-            items: [{title: 'Inception', year: 2010}, {title: 'The Matrix', year: 1999}]
+            items: [
+              {title: 'Inception', year: 2010},
+              {title: 'The Matrix', year: 1999}
+            ]
           }
         });
       });
@@ -214,7 +235,7 @@ describe('@deepr/runtime', () => {
         invokeQuery(
           {
             movies: {
-              * [Symbol.iterator]() {
+              *[Symbol.iterator]() {
                 yield {title: 'Inception', year: 2010};
                 yield {title: 'The Matrix', year: 1999};
               },
@@ -223,7 +244,7 @@ describe('@deepr/runtime', () => {
               }
             }
           },
-          {movies: {count: {'()': []}, '=>items': [{title: true}]}}
+          {movies: {'count': {'()': []}, '=>items': [{title: true}]}}
         )
       ).toEqual({
         movies: {
@@ -256,7 +277,7 @@ describe('@deepr/runtime', () => {
 
       expect(
         invokeQuery(object, {
-          movie: {'()': [{id: 'cjrts72gy00ik01rv6eins4se'}], title: true, year: true}
+          movie: {'()': [{id: 'cjrts72gy00ik01rv6eins4se'}], 'title': true, 'year': true}
         })
       ).toEqual({movie: {title: 'Inception', year: 2010}});
     });
@@ -304,7 +325,7 @@ describe('@deepr/runtime', () => {
         expect(
           invokeQuery(
             {movie: {title: 'Inception'}},
-            {movie: {title: true, 'director?': {fullName: true}}}
+            {movie: {'title': true, 'director?': {fullName: true}}}
           )
         ).toEqual({movie: {title: 'Inception'}});
 
@@ -324,7 +345,7 @@ describe('@deepr/runtime', () => {
         expect(
           invokeQuery(
             {movie: {title: 'Inception'}},
-            {movie: {title: true, 'actors?': {'()': [{sort: {by: 'popularity'}}]}}}
+            {movie: {'title': true, 'actors?': {'()': [{sort: {by: 'popularity'}}]}}}
           )
         ).toEqual({movie: {title: 'Inception'}});
       });
@@ -342,7 +363,7 @@ describe('@deepr/runtime', () => {
         await expect(
           invokeQuery(
             {movie: makePromise({title: 'Inception'})},
-            {movie: {title: true, 'director?': {fullName: true}}}
+            {movie: {'title': true, 'director?': {fullName: true}}}
           )
         ).resolves.toEqual({movie: {title: 'Inception'}});
 
@@ -365,7 +386,7 @@ describe('@deepr/runtime', () => {
         await expect(
           invokeQuery(
             {movie: makePromise({title: 'Inception'})},
-            {movie: {title: true, 'actors?': {'()': [{sort: {by: 'popularity'}}]}}}
+            {movie: {'title': true, 'actors?': {'()': [{sort: {by: 'popularity'}}]}}}
           )
         ).resolves.toEqual({movie: {title: 'Inception'}});
       });
@@ -389,7 +410,7 @@ describe('@deepr/runtime', () => {
             },
             'save=>movie': {
               '()': [],
-              id: true
+              'id': true
             }
           }
         )

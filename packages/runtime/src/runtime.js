@@ -1,7 +1,5 @@
 import {possiblyAsync} from 'possibly-async';
 
-/* eslint-disable prefer-arrow-callback */
-
 export function invokeExpression(object, expression, options = {}) {
   if (object === undefined) {
     throw new Error(`'object' parameter is missing`);
@@ -46,7 +44,7 @@ function _invokeExpression(
 
       if (useCollectionElements) {
         const collection = object;
-        const results = possiblyAsync.map(collection, function (object) {
+        const results = possiblyAsync.map(collection, function(object) {
           return _invokeExpression(object, {nestedExpressions, nextExpression}, options);
         });
         return results;
@@ -56,7 +54,7 @@ function _invokeExpression(
         return _invokeExpression(object, nextExpression, options);
       }
 
-      const results = possiblyAsync.mapObject(nestedExpressions, function (nestedExpression) {
+      const results = possiblyAsync.mapObject(nestedExpressions, function(nestedExpression) {
         return _invokeExpression(object, nestedExpression, options);
       });
       return results;

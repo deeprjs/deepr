@@ -203,7 +203,7 @@ function getBuiltInKeys() {
     _builtInKeys = [];
     class Obj {}
     const obj = new Obj();
-    const func = function () {};
+    const func = function() {};
     _addKeys(_builtInKeys, obj);
     _addKeys(_builtInKeys, func);
     _addKeys(_builtInKeys, Obj);

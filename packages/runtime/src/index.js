@@ -18,7 +18,7 @@ export function invokeQuery(
 
   if (Array.isArray(query)) {
     const queries = query;
-    return possiblyAsync.map(queries, function (query) {
+    return possiblyAsync.map(queries, function(query) {
       return invokeQuery(root, query, {
         context,
         ignoreKeys,
