@@ -2,11 +2,5 @@
   "@import": "1place/js-repository#^0.1.0",
   "runtime": {
     "@include": "./packages/runtime"
-  },
-  "link": {
-    "@type": "method",
-    "@run": [
-      "(@import shell/bash) run \"npm-link ./packages/runtime\""
-    ]
   }
 }
