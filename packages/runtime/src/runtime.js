@@ -54,7 +54,7 @@ function _invokeExpression(
         return _invokeExpression(object, nextExpression, options);
       }
 
-      const results = possiblyAsync.mapObject(nestedExpressions, function(nestedExpression) {
+      const results = possiblyAsync.mapValues(nestedExpressions, function(nestedExpression) {
         return _invokeExpression(object, nestedExpression, options);
       });
       return results;
