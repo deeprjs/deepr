@@ -6,7 +6,7 @@ import {invokeExpression} from './runtime';
 export function invokeQuery(
   root,
   query,
-  {context, ignoreKeys, acceptKeys, ignoreBuiltInKeys, authorizer} = {}
+  {context, ignoreKeys, acceptKeys, ignoreBuiltInKeys, authorizer, errorHandler} = {}
 ) {
   if (root === undefined) {
     throw new Error(`'root' parameter is missing`);
@@ -24,13 +24,15 @@ export function invokeQuery(
         ignoreKeys,
         acceptKeys,
         ignoreBuiltInKeys,
-        authorizer
+        authorizer,
+        errorHandler
       });
     });
   }
 
   return invokeExpression(root, parseQuery(query, {ignoreKeys, acceptKeys, ignoreBuiltInKeys}), {
     context,
-    authorizer
+    authorizer,
+    errorHandler
   });
 }

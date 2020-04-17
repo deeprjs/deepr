@@ -10,7 +10,30 @@ export function invokeExpression(object, expression, options = {}) {
   return _invokeExpression(object, expression, options);
 }
 
-function _invokeExpression(
+function _invokeExpression(object, expression, options, _isMapping = false) {
+  const {errorHandler} = options;
+
+  return possiblyAsync.call(
+    [
+      function() {
+        return __invokeExpression(object, expression, options);
+      }
+    ],
+    {
+      catch(error) {
+        if (errorHandler === undefined) {
+          throw error;
+        }
+
+        const result = errorHandler.call(object, error);
+
+        return _isMapping ? {[possiblyAsync.break]: result} : result;
+      }
+    }
+  );
+}
+
+function __invokeExpression(
   object,
   {
     sourceKey,
@@ -45,7 +68,7 @@ function _invokeExpression(
       if (useCollectionElements) {
         const collection = object;
         const results = possiblyAsync.map(collection, function(object) {
-          return _invokeExpression(object, {nestedExpressions, nextExpression}, options);
+          return _invokeExpression(object, {nestedExpressions, nextExpression}, options, true);
         });
         return results;
       }
@@ -55,7 +78,7 @@ function _invokeExpression(
       }
 
       const results = possiblyAsync.mapValues(nestedExpressions, function(nestedExpression) {
-        return _invokeExpression(object, nestedExpression, options);
+        return _invokeExpression(object, nestedExpression, options, true);
       });
       return results;
     }

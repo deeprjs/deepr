@@ -1,6 +1,6 @@
 {
   "name": "@deepr/runtime",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "Simple Deepr runtime",
   "files": [
     "dist"

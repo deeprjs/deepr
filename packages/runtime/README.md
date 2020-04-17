@@ -169,6 +169,24 @@ function authorizer(key, operation) {
 }
 ```
 
+##### `errorHandler(error) => value`
+
+A function that is called when an error is encountered while invoking the query.
+
+If the function throws an error (the received `error` or any other error), the invocation of the query is stopped and the responsibility for catching the thrown error is transferred to the caller of `invokeQuery()`.
+
+If the function returns a `value`, the invocation of the query is stopped and the `value` is injected into the result of the query without failing the execution of `invokeQuery()`.
+
+The value of `this` in the function is the current node of the query being evaluated.
+
+Example:
+
+```js
+function errorHandler(error) {
+  return error; // Inject the error into the result of the query
+}
+```
+
 ## Contribute
 
 This project uses [Run](https://run.tools) to manage the development environment.

@@ -571,6 +571,64 @@ describe('@deepr/runtime', () => {
         )
       ).toThrow('Cannot execute a method that is not allowed');
     });
+
+    test('errorHandler', () => {
+      const root = {
+        user: {
+          username: 'steve',
+          syncMethod() {
+            throw new Error('An error occurred while executing a synchronous method');
+          },
+          asyncMethod() {
+            throw new Error('An error occurred while executing an asynchronous method');
+          }
+        }
+      };
+
+      const options = {
+        errorHandler(error) {
+          return {__error: error.message};
+        }
+      };
+
+      expect(
+        invokeQuery(
+          root,
+          {
+            user: {
+              username: true,
+              syncMethod: {'()': []},
+              asyncMethod: {'()': []}
+            }
+          },
+          options
+        )
+      ).toEqual({
+        user: {
+          username: 'steve',
+          syncMethod: {__error: 'An error occurred while executing a synchronous method'}
+        }
+      });
+
+      expect(
+        invokeQuery(
+          root,
+          {
+            user: {
+              username: true,
+              asyncMethod: {'()': []},
+              syncMethod: {'()': []}
+            }
+          },
+          options
+        )
+      ).toEqual({
+        user: {
+          username: 'steve',
+          asyncMethod: {__error: 'An error occurred while executing an asynchronous method'}
+        }
+      });
+    });
   });
 });
 
