@@ -20,8 +20,7 @@
   },
   "scripts": {
     "build": "dev-tools build:ts-library",
-    "prepack": "npm run build",
-    "prepublishOnly": "npm run test",
+    "prepare": "npm run build && npm run test",
     "test": "dev-tools test:ts-library"
   },
   "dependencies": {
