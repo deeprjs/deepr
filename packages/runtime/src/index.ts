@@ -1,24 +1,32 @@
 import {possiblyAsync} from 'possibly-async';
 
-import {parseQuery} from './parser';
-import {invokeExpression} from './runtime';
+import {query} from './query';
+import {parseQuery, parseQueryOptions} from './parser';
+import {invokeExpression, invokeExpressionOptions} from './runtime';
 
 export function invokeQuery(
-  root,
-  query,
-  {context, ignoreKeys, acceptKeys, ignoreBuiltInKeys, authorizer, errorHandler} = {}
-) {
+  root: any,
+  query: query | query[],
+  {
+    context,
+    ignoreKeys,
+    acceptKeys,
+    ignoreBuiltInKeys,
+    authorizer,
+    errorHandler
+  }: parseQueryOptions & invokeExpressionOptions = {}
+): any {
   if (root === undefined) {
-    throw new Error(`'root' parameter is missing`);
+    throw new Error(`The 'root' parameter is missing`);
   }
 
   if (query === undefined) {
-    throw new Error(`'query' parameter is missing`);
+    throw new Error(`The 'query' parameter is missing`);
   }
 
   if (Array.isArray(query)) {
     const queries = query;
-    return possiblyAsync.map(queries, function(query) {
+    return possiblyAsync.map(queries, function (query: query) {
       return invokeQuery(root, query, {
         context,
         ignoreKeys,

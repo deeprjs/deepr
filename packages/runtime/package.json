@@ -2,40 +2,34 @@
   "name": "@deepr/runtime",
   "version": "0.3.6",
   "description": "Simple Deepr runtime",
-  "files": [
-    "dist"
+  "keywords": [
+    "deepr",
+    "query",
+    "runtime"
   ],
-  "main": "dist/node/cjs",
-  "module": "dist/node/esm",
-  "browser": "dist/browser/esm",
-  "dependencies": {
-    "possibly-async": "^0.2.3"
-  },
   "author": "Manuel Vila <hi@mvila.me>",
   "license": "MIT",
   "repository": "https://github.com/deeprjs/deepr/tree/master/packages/runtime",
-  "@managed": {
-    "warning": "This file contains properties managed by a Resource. You should not modify them directly or use a command such as `npm install <name>`.",
-    "properties": [
-      "name",
-      "version",
-      "description",
-      "keywords",
-      "homepage",
-      "author",
-      "contributors",
-      "license",
-      "repository",
-      "files",
-      "main",
-      "module",
-      "browser",
-      "bin",
-      "dependencies",
-      "peerDependencies",
-      "optionalDependencies",
-      "devDependencies",
-      "private"
-    ]
+  "files": [
+    "dist"
+  ],
+  "main": "dist/node-cjs/index.js",
+  "module": "dist/node-esm/index.js",
+  "engines": {
+    "node": ">=10.0.0"
+  },
+  "scripts": {
+    "build": "dev-tools build:ts-library",
+    "prepack": "npm run build",
+    "prepublishOnly": "npm run test",
+    "test": "dev-tools test:ts-library"
+  },
+  "dependencies": {
+    "possibly-async": "^0.2.4",
+    "tslib": "^1.11.1"
+  },
+  "devDependencies": {
+    "@mvila/dev-tools": "^1.0.3",
+    "@mvila/tsconfig": "^1.0.3"
   }
 }

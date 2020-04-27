@@ -1,3 +1,6 @@
+import {query} from './query';
+import {expression} from './expression';
+
 /*
 parseQuery(query) => expression
 
@@ -37,12 +40,20 @@ Into an expression that is easier to execute by the runtime:
 }
 */
 
+export type parseQueryOptions = {
+  ignoreKeys?: pattern | pattern[];
+  acceptKeys?: pattern | pattern[];
+  ignoreBuiltInKeys?: boolean;
+};
+
+type pattern = string | RegExp;
+
 export function parseQuery(
-  query,
-  {ignoreKeys = [], acceptKeys = [], ignoreBuiltInKeys = true} = {}
-) {
+  query: query,
+  {ignoreKeys = [], acceptKeys = [], ignoreBuiltInKeys = true}: parseQueryOptions = {}
+): expression {
   if (query === undefined) {
-    throw new Error(`'query' parameter is missing`);
+    throw new Error(`The 'query' parameter is missing`);
   }
 
   if (!Array.isArray(ignoreKeys)) {
@@ -58,20 +69,25 @@ export function parseQuery(
 
 // eslint-disable-next-line complexity
 function _parseQuery(
-  query,
-  {sourceKey = '', isOptional},
-  {ignoreKeys, acceptKeys, ignoreBuiltInKeys}
-) {
+  query: query,
+  {sourceKey = '', isOptional}: {sourceKey?: string; isOptional?: boolean},
+  {
+    ignoreKeys,
+    acceptKeys,
+    ignoreBuiltInKeys
+  }: {ignoreKeys: pattern[]; acceptKeys: pattern[]; ignoreBuiltInKeys: boolean}
+): expression {
   if (query === undefined) {
-    throw new Error(`'query' parameter is missing`);
+    throw new Error(`The 'query' parameter is missing`);
   }
 
-  const expression = {sourceKey, isOptional};
+  const expression: expression = {sourceKey, isOptional};
 
   if (Array.isArray(query)) {
     if (query.length !== 1) {
       throw new Error('An array should contain exactly one item');
     }
+
     expression.useCollectionElements = true;
     query = query[0];
   }
@@ -84,19 +100,21 @@ function _parseQuery(
     throw new Error(`Invalid query found: ${JSON.stringify(query)}`);
   }
 
-  let params;
-  let sourceValue;
-  let nestedExpressions;
-  let nextExpression;
+  let params: any[] | undefined;
+  let sourceValue: any;
+  let nestedExpressions: {[key: string]: expression} | undefined;
+  let nextExpression: expression | undefined;
 
   for (const [key, value] of Object.entries(query)) {
     if (key === '()') {
       if (params !== undefined) {
         throw new Error('Multiple parameters found at the same level');
       }
+
       if (!Array.isArray(value)) {
         throw new Error('Parameters must be specified in an array');
       }
+
       params = value;
       continue;
     }
@@ -105,6 +123,7 @@ function _parseQuery(
       if (sourceValue !== undefined) {
         throw new Error('Multiple source values found at the same level');
       }
+
       sourceValue = value;
       continue;
     }
@@ -129,11 +148,13 @@ function _parseQuery(
       if (nestedExpressions === undefined) {
         nestedExpressions = {};
       }
+
       nestedExpressions[targetKey] = subexpression;
     } else {
       if (nextExpression) {
         throw new Error('Multiple empty targets found at the same level');
       }
+
       nextExpression = subexpression;
     }
   }
@@ -160,10 +181,10 @@ function _parseQuery(
   return expression;
 }
 
-function parseKey(key) {
-  let sourceKey;
-  let targetKey;
-  let isOptional;
+function parseKey(key: string) {
+  let sourceKey: string;
+  let targetKey: string;
+  let isOptional: boolean | undefined;
 
   const parts = key.split('=>');
 
@@ -182,42 +203,49 @@ function parseKey(key) {
   return {sourceKey, targetKey, isOptional};
 }
 
-function parseSourceKey(sourceKey) {
-  let isOptional;
+function parseSourceKey(sourceKey: string) {
+  let isOptional: boolean | undefined;
+
   if (sourceKey.endsWith('?')) {
     isOptional = true;
     sourceKey = sourceKey.slice(0, -1);
   }
+
   return {sourceKey, isOptional};
 }
 
-function testKey(key, patterns) {
+function testKey(key: string, patterns: pattern[]) {
   return patterns.some(pattern =>
     typeof pattern === 'string' ? pattern === key : pattern.test(key)
   );
 }
 
-let _builtInKeys;
+let _builtInKeys: string[];
+
 function getBuiltInKeys() {
-  if (!_builtInKeys) {
+  if (_builtInKeys === undefined) {
     _builtInKeys = [];
+
     class Obj {}
     const obj = new Obj();
     const func = function() {};
+
     _addKeys(_builtInKeys, obj);
     _addKeys(_builtInKeys, func);
     _addKeys(_builtInKeys, Obj);
   }
+
   return _builtInKeys;
 }
 
-function _addKeys(array, object) {
+function _addKeys(array: string[], object: object) {
   while (object) {
     for (const key of Object.getOwnPropertyNames(object)) {
       if (!(key === 'name' || key === 'length' || array.indexOf(key) !== -1)) {
         array.push(key);
       }
     }
+
     object = Object.getPrototypeOf(object);
   }
 }

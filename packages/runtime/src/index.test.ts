@@ -1,4 +1,4 @@
-import {invokeQuery} from '../../..';
+import {invokeQuery} from './';
 
 describe('@deepr/runtime', () => {
   describe('Simple queries', () => {
@@ -166,7 +166,7 @@ describe('@deepr/runtime', () => {
       expect(
         invokeQuery(
           {
-            sum(a, b) {
+            sum(a: number, b: number) {
               return a + b;
             }
           },
@@ -192,7 +192,7 @@ describe('@deepr/runtime', () => {
           return 2;
         }
       }
-      Movies.count.route = '/movies/count';
+      (Movies.count as any).route = '/movies/count';
       expect(invokeQuery({Movies}, {Movies: {count: {route: true}}})).toEqual({
         Movies: {count: {route: '/movies/count'}}
       });
@@ -210,13 +210,14 @@ describe('@deepr/runtime', () => {
       expect(
         invokeQuery(
           {
-            movies({filter: {genre}}) {
+            movies({filter: {genre}}: {filter: {genre: string}}) {
               if (genre === 'action') {
                 return [{title: 'Inception'}, {title: 'The Matrix'}];
               }
               if (genre === 'drama') {
                 return [{title: 'Forrest Gump'}];
               }
+              return [];
             }
           },
           {
@@ -262,10 +263,11 @@ describe('@deepr/runtime', () => {
 
     test('"=>" variant', () => {
       const object = {
-        movie({id}) {
+        movie({id}: {id: string}) {
           if (id === 'cjrts72gy00ik01rv6eins4se') {
             return {title: 'Inception', year: 2010, country: 'USA'};
           }
+          return undefined;
         }
       };
 
@@ -427,7 +429,7 @@ describe('@deepr/runtime', () => {
       expect(
         invokeQuery(
           {
-            movie({id}, {accessToken}) {
+            movie({id}: {id: string}, {accessToken}: {accessToken?: string}) {
               if (accessToken !== 'super-secret-token') {
                 throw new Error('Access denied');
               }
@@ -518,7 +520,7 @@ describe('@deepr/runtime', () => {
       };
 
       const options = {
-        authorizer(key, operation) {
+        authorizer(key: string, operation: string) {
           if (key === 'user' && operation === 'get') {
             return true;
           }
@@ -586,7 +588,7 @@ describe('@deepr/runtime', () => {
       };
 
       const options = {
-        errorHandler(error) {
+        errorHandler(error: Error) {
           return {__error: error.message};
         }
       };
@@ -632,8 +634,8 @@ describe('@deepr/runtime', () => {
   });
 });
 
-function makePromise(value) {
-  return new Promise(resolve => {
+function makePromise(value: any) {
+  return new Promise((resolve) => {
     setTimeout(() => {
       while (typeof value === 'function') {
         value = value();
