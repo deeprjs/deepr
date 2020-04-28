@@ -20,7 +20,8 @@
   },
   "scripts": {
     "build": "dev-tools build:ts-library",
-    "prepare": "npm run build && npm run test",
+    "link": "dev-tools link:local-packages",
+    "prepare": "npm run link && npm run build && npm run test",
     "test": "dev-tools test:ts-library"
   },
   "dependencies": {
@@ -28,7 +29,7 @@
     "tslib": "^1.11.1"
   },
   "devDependencies": {
-    "@mvila/dev-tools": "^1.0.3",
+    "@mvila/dev-tools": "^1.0.7",
     "@mvila/tsconfig": "^1.0.3"
   }
 }

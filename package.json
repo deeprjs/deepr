@@ -13,8 +13,8 @@
   "repository": "https://github.com/deeprjs/deepr",
   "prettier": "@mvila/prettierrc",
   "devDependencies": {
-    "lerna": "^3.20.2",
     "@mvila/prettierrc": "^1.0.0",
+    "lerna": "^3.20.2",
     "prettier": "^2.0.5"
   }
 }
