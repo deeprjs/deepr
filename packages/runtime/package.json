@@ -20,8 +20,7 @@
   },
   "scripts": {
     "build": "dev-tools build:ts-library",
-    "link": "command -v dev-tools >/dev/null 2>&1 && dev-tools link:local-packages || :",
-    "preinstall": "npm run link",
+    "link": "dev-tools link:local-packages",
     "prepare": "npm run build && npm run test",
     "test": "dev-tools test:ts-library"
   },
