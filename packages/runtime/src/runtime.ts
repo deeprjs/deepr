@@ -1,8 +1,8 @@
 import {possiblyAsync} from 'possibly-async';
 
-import {expression} from './expression';
+import {Expression} from './expression';
 
-export type invokeExpressionOptions = {
+export type InvokeExpressionOptions = {
   context?: any;
   authorizer?: Function;
   errorHandler?: Function;
@@ -10,8 +10,8 @@ export type invokeExpressionOptions = {
 
 export function invokeExpression(
   target: any,
-  expression: expression,
-  options: invokeExpressionOptions = {}
+  expression: Expression,
+  options: InvokeExpressionOptions = {}
 ) {
   if (target === undefined) {
     throw new Error(`'target' parameter is missing`);
@@ -26,8 +26,8 @@ export function invokeExpression(
 
 function _invokeExpression(
   target: any,
-  expression: expression,
-  options: invokeExpressionOptions,
+  expression: Expression,
+  options: InvokeExpressionOptions,
   _isMapping = false
 ): any {
   const {errorHandler} = options;
@@ -62,8 +62,8 @@ function __invokeExpression(
     useCollectionElements,
     nestedExpressions,
     nextExpression
-  }: expression,
-  options: invokeExpressionOptions
+  }: Expression,
+  options: InvokeExpressionOptions
 ): any {
   target = sourceKey ? evaluateKey(target, sourceKey, {params, isOptional}, options) : target;
 
@@ -105,7 +105,7 @@ function __invokeExpression(
       }
 
       const results = possiblyAsync.mapValues(nestedExpressions!, function (
-        nestedExpression: expression
+        nestedExpression: Expression
       ) {
         return _invokeExpression(target, nestedExpression, options, true);
       });
@@ -119,7 +119,7 @@ function evaluateKey(
   target: any,
   key: string,
   {params, isOptional}: {params?: any[]; isOptional?: boolean},
-  options: invokeExpressionOptions
+  options: InvokeExpressionOptions
 ) {
   const value = target[key];
 
@@ -134,7 +134,7 @@ function evaluateAttribute(
   target: any,
   key: string,
   value: any,
-  {authorizer}: invokeExpressionOptions
+  {authorizer}: InvokeExpressionOptions
 ) {
   return possiblyAsync(evaluateAuthorizer(target, authorizer, key, 'get'), {
     then(isAllowed: boolean) {
@@ -155,7 +155,7 @@ function evaluateMethod(
   key: string,
   method: Function,
   {params, isOptional}: {params: any[]; isOptional?: boolean},
-  {context, authorizer}: invokeExpressionOptions
+  {context, authorizer}: InvokeExpressionOptions
 ) {
   if (method === undefined) {
     if (isOptional) {

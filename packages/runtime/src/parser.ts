@@ -1,5 +1,5 @@
-import {query} from './query';
-import {expression} from './expression';
+import {Query} from './query';
+import {Expression} from './expression';
 
 /*
 parseQuery(query) => expression
@@ -40,18 +40,18 @@ Into an expression that is easier to execute by the runtime:
 }
 */
 
-export type parseQueryOptions = {
-  ignoreKeys?: pattern | pattern[];
-  acceptKeys?: pattern | pattern[];
+export type ParseQueryOptions = {
+  ignoreKeys?: Pattern | Pattern[];
+  acceptKeys?: Pattern | Pattern[];
   ignoreBuiltInKeys?: boolean;
 };
 
-type pattern = string | RegExp;
+type Pattern = string | RegExp;
 
 export function parseQuery(
-  query: query,
-  {ignoreKeys = [], acceptKeys = [], ignoreBuiltInKeys = true}: parseQueryOptions = {}
-): expression {
+  query: Query,
+  {ignoreKeys = [], acceptKeys = [], ignoreBuiltInKeys = true}: ParseQueryOptions = {}
+): Expression {
   if (query === undefined) {
     throw new Error(`The 'query' parameter is missing`);
   }
@@ -69,19 +69,19 @@ export function parseQuery(
 
 // eslint-disable-next-line complexity
 function _parseQuery(
-  query: query,
+  query: Query,
   {sourceKey = '', isOptional}: {sourceKey?: string; isOptional?: boolean},
   {
     ignoreKeys,
     acceptKeys,
     ignoreBuiltInKeys
-  }: {ignoreKeys: pattern[]; acceptKeys: pattern[]; ignoreBuiltInKeys: boolean}
-): expression {
+  }: {ignoreKeys: Pattern[]; acceptKeys: Pattern[]; ignoreBuiltInKeys: boolean}
+): Expression {
   if (query === undefined) {
     throw new Error(`The 'query' parameter is missing`);
   }
 
-  const expression: expression = {sourceKey, isOptional};
+  const expression: Expression = {sourceKey, isOptional};
 
   if (Array.isArray(query)) {
     if (query.length !== 1) {
@@ -102,8 +102,8 @@ function _parseQuery(
 
   let params: any[] | undefined;
   let sourceValue: any;
-  let nestedExpressions: {[key: string]: expression} | undefined;
-  let nextExpression: expression | undefined;
+  let nestedExpressions: {[key: string]: Expression} | undefined;
+  let nextExpression: Expression | undefined;
 
   for (const [key, value] of Object.entries(query)) {
     if (key === '()') {
@@ -214,8 +214,8 @@ function parseSourceKey(sourceKey: string) {
   return {sourceKey, isOptional};
 }
 
-function testKey(key: string, patterns: pattern[]) {
-  return patterns.some(pattern =>
+function testKey(key: string, patterns: Pattern[]) {
+  return patterns.some((pattern) =>
     typeof pattern === 'string' ? pattern === key : pattern.test(key)
   );
 }
@@ -228,7 +228,7 @@ function getBuiltInKeys() {
 
     class Obj {}
     const obj = new Obj();
-    const func = function() {};
+    const func = function () {};
 
     _addKeys(_builtInKeys, obj);
     _addKeys(_builtInKeys, func);

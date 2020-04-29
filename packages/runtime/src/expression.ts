@@ -1,9 +1,9 @@
-export type expression = {
+export type Expression = {
   sourceKey: string;
   sourceValue?: any;
   isOptional?: boolean;
   params?: any[];
   useCollectionElements?: boolean;
-  nextExpression?: expression;
-  nestedExpressions?: {[key: string]: expression};
+  nextExpression?: Expression;
+  nestedExpressions?: {[key: string]: Expression};
 };

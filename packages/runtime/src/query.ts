@@ -1,1 +1,1 @@
-export type query = object | true;
+export type Query = object | true;
