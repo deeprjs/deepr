@@ -32,22 +32,21 @@ function _invokeExpression(
 ): any {
   const {errorHandler} = options;
 
-  return possiblyAsync.call(
-    [
-      function () {
-        return __invokeExpression(target, expression, options);
+  return possiblyAsync.invoke(
+    function () {
+      return __invokeExpression(target, expression, options);
+    },
+    function (result) {
+      return result;
+    },
+    function (error: Error) {
+      if (errorHandler === undefined) {
+        throw error;
       }
-    ],
-    {
-      catch(error: Error) {
-        if (errorHandler === undefined) {
-          throw error;
-        }
 
-        const result = errorHandler.call(target, error);
+      const result = errorHandler.call(target, error);
 
-        return _isMapping ? {[possiblyAsync.breakSymbol]: result} : result;
-      }
+      return _isMapping ? {[possiblyAsync.breakSymbol]: result} : result;
     }
   );
 }
@@ -67,51 +66,49 @@ function __invokeExpression(
 ): any {
   target = sourceKey ? evaluateKey(target, sourceKey, {params, isOptional}, options) : target;
 
-  return possiblyAsync(target, {
-    then(target: any) {
-      if (sourceValue !== undefined) {
-        target = sourceValue;
+  return possiblyAsync(target, function (target: any) {
+    if (sourceValue !== undefined) {
+      target = sourceValue;
+    }
+
+    if (!(nestedExpressions || nextExpression)) {
+      return target;
+    }
+
+    if (target === undefined) {
+      if (isOptional) {
+        return undefined;
       }
 
-      if (!(nestedExpressions || nextExpression)) {
-        return target;
-      }
+      throw new Error(`Cannot execute a query on \`undefined\` (key: '${sourceKey}')`);
+    }
 
-      if (target === undefined) {
-        if (isOptional) {
-          return undefined;
-        }
+    if (useCollectionElements) {
+      const collection = target;
 
-        throw new Error(`Cannot execute a query on \`undefined\` (key: '${sourceKey}')`);
-      }
-
-      if (useCollectionElements) {
-        const collection = target;
-
-        const results = possiblyAsync.map(collection, function (item: any) {
-          return _invokeExpression(
-            item,
-            {sourceKey: '', nestedExpressions, nextExpression},
-            options,
-            true
-          );
-        });
-
-        return results;
-      }
-
-      if (nextExpression) {
-        return _invokeExpression(target, nextExpression, options);
-      }
-
-      const results = possiblyAsync.mapValues(nestedExpressions!, function (
-        nestedExpression: Expression
-      ) {
-        return _invokeExpression(target, nestedExpression, options, true);
+      const results = possiblyAsync.map(collection, function (item: any) {
+        return _invokeExpression(
+          item,
+          {sourceKey: '', nestedExpressions, nextExpression},
+          options,
+          true
+        );
       });
 
       return results;
     }
+
+    if (nextExpression) {
+      return _invokeExpression(target, nextExpression, options);
+    }
+
+    const results = possiblyAsync.mapValues(nestedExpressions!, function (
+      nestedExpression: Expression
+    ) {
+      return _invokeExpression(target, nestedExpression, options, true);
+    });
+
+    return results;
   });
 }
 
@@ -136,16 +133,14 @@ function evaluateAttribute(
   value: any,
   {authorizer}: InvokeExpressionOptions
 ) {
-  return possiblyAsync(evaluateAuthorizer(target, authorizer, key, 'get'), {
-    then(isAllowed: boolean) {
-      if (!isAllowed) {
-        throw new Error(
-          `Cannot get the value of an attribute that is not allowed (name: '${key}')`
-        );
-      }
-
-      return value;
+  return possiblyAsync(evaluateAuthorizer(target, authorizer, key, 'get'), function (
+    isAllowed: boolean
+  ) {
+    if (!isAllowed) {
+      throw new Error(`Cannot get the value of an attribute that is not allowed (name: '${key}')`);
     }
+
+    return value;
   });
 }
 
@@ -165,14 +160,14 @@ function evaluateMethod(
     throw new Error(`Couldn't found a method matching the key '${key}'`);
   }
 
-  return possiblyAsync(evaluateAuthorizer(target, authorizer, key, 'call', params), {
-    then(isAllowed: boolean) {
-      if (!isAllowed) {
-        throw new Error(`Cannot execute a method that is not allowed (name: '${key}')`);
-      }
-
-      return method.call(target, ...params, context);
+  return possiblyAsync(evaluateAuthorizer(target, authorizer, key, 'call', params), function (
+    isAllowed: boolean
+  ) {
+    if (!isAllowed) {
+      throw new Error(`Cannot execute a method that is not allowed (name: '${key}')`);
     }
+
+    return method.call(target, ...params, context);
   });
 }
 

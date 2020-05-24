@@ -1,4 +1,4 @@
-import {invokeQuery} from './';
+import {invokeQuery} from './main';
 
 describe('@deepr/runtime', () => {
   describe('Simple queries', () => {

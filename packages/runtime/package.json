@@ -25,7 +25,8 @@
     "test": "dev-tools test:ts-library"
   },
   "dependencies": {
-    "possibly-async": "^0.2.4",
+    "core-helpers": "^0.1.0",
+    "possibly-async": "^0.2.15",
     "tslib": "^1.11.1"
   },
   "devDependencies": {

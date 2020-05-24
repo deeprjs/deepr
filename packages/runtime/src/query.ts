@@ -1,1 +1,3 @@
-export type Query = object | true;
+import {PlainObject} from 'core-helpers';
+
+export type Query = PlainObject | true;
