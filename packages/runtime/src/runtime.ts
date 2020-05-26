@@ -1,12 +1,17 @@
 import {possiblyAsync} from 'possibly-async';
+import {PromiseLikeable} from 'core-helpers';
 
 import {Expression} from './expression';
 
 export type InvokeExpressionOptions = {
   context?: any;
-  authorizer?: Function;
-  errorHandler?: Function;
+  authorizer?: Authorizer;
+  errorHandler?: ErrorHandler;
 };
+
+type Authorizer = (key: string, operation: string, params?: any[]) => PromiseLikeable<boolean>;
+
+type ErrorHandler = (error: Error) => unknown;
 
 export function invokeExpression(
   target: any,
@@ -29,7 +34,7 @@ function _invokeExpression(
   expression: Expression,
   options: InvokeExpressionOptions,
   _isMapping = false
-): any {
+) {
   const {errorHandler} = options;
 
   return possiblyAsync.invoke(
@@ -63,7 +68,7 @@ function __invokeExpression(
     nextExpression
   }: Expression,
   options: InvokeExpressionOptions
-): any {
+): unknown {
   target = sourceKey ? evaluateKey(target, sourceKey, {params, isOptional}, options) : target;
 
   return possiblyAsync(target, function (target: any) {
@@ -130,7 +135,7 @@ function evaluateKey(
 function evaluateAttribute(
   target: any,
   key: string,
-  value: any,
+  value: unknown,
   {authorizer}: InvokeExpressionOptions
 ) {
   return possiblyAsync(evaluateAuthorizer(target, authorizer, key, 'get'), function (
@@ -148,7 +153,7 @@ function evaluateAttribute(
 function evaluateMethod(
   target: any,
   key: string,
-  method: Function,
+  method: (...args: any[]) => unknown,
   {params, isOptional}: {params: any[]; isOptional?: boolean},
   {context, authorizer}: InvokeExpressionOptions
 ) {
@@ -174,7 +179,7 @@ function evaluateMethod(
 // eslint-disable-next-line max-params
 function evaluateAuthorizer(
   target: any,
-  authorizer: Function | undefined,
+  authorizer: Authorizer | undefined,
   key: string,
   operation: string,
   params?: any[]

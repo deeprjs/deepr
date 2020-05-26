@@ -15,7 +15,7 @@ export function invokeQuery(
     authorizer,
     errorHandler
   }: ParseQueryOptions & InvokeExpressionOptions = {}
-): any {
+): unknown {
   if (root === undefined) {
     throw new Error(`The 'root' parameter is missing`);
   }
