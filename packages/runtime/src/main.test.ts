@@ -342,7 +342,7 @@ describe('@deepr/runtime', () => {
             {movie: {title: 'Inception'}},
             {movie: {title: true, actors: {'()': [{sort: {by: 'popularity'}}]}}}
           )
-        ).toThrow(/Couldn't found a method matching the key/);
+        ).toThrow(/Couldn't find a method matching the key/);
 
         expect(
           invokeQuery(

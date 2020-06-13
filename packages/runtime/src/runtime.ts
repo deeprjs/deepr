@@ -162,7 +162,7 @@ function evaluateMethod(
       return undefined;
     }
 
-    throw new Error(`Couldn't found a method matching the key '${key}'`);
+    throw new Error(`Couldn't find a method matching the key '${key}'`);
   }
 
   return possiblyAsync(evaluateAuthorizer(target, authorizer, key, 'call', params), function (
