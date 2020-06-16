@@ -1,6 +1,6 @@
 {
   "name": "@deepr/runtime",
-  "version": "0.4.7",
+  "version": "0.4.8",
   "description": "Simple Deepr runtime",
   "keywords": [
     "deepr",
@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "core-helpers": "^0.1.26",
-    "possibly-async": "^0.2.19",
+    "possibly-async": "^0.2.20",
     "tslib": "^1.13.0"
   },
   "devDependencies": {
