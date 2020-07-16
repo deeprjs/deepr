@@ -38,7 +38,7 @@ import {invokeQuery} from '@deepr/runtime';
       '()': ['abc123'],
       '=>': {
         title: true,
-        actors: [{fullName: true}]
+        actors: {'[]': [], 'fullName': true}
       }
     }
   });
@@ -63,12 +63,11 @@ Example:
 
 ```js
 const result = await invokeQuery(root, {
-  movies: [
-    {
-      title: true,
-      year: true
-    }
-  ]
+  movies: {
+    '[]': [],
+    'title': true,
+    'year': true
+  }
 });
 ```
 
@@ -101,12 +100,11 @@ Example:
 
 ```json
 {
-  "movies": [
-    {
-      "title": true,
-      "year": true
-    }
-  ]
+  "movies": {
+    "[]": [],
+    "title": true,
+    "year": true
+  }
 }
 ```
 

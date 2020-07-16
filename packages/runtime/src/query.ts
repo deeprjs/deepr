@@ -1,3 +1,5 @@
 import {PlainObject} from 'core-helpers';
 
-export type Query = PlainObject | true;
+export type Query = SingleQuery | SingleQuery[];
+
+export type SingleQuery = PlainObject | true;

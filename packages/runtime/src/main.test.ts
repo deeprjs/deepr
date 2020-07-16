@@ -43,7 +43,7 @@ describe('@deepr/runtime', () => {
                 {title: 'The Matrix', year: 1999}
               ]
             },
-            {movies: [{title: true, year: true}]}
+            {movies: {'[]': [], 'title': true, 'year': true}}
           )
         ).toEqual({
           movies: [
@@ -67,7 +67,7 @@ describe('@deepr/runtime', () => {
                 }
               }
             },
-            {movies: {'count': {'()': []}, '=>items': [{title: true, year: true}]}}
+            {movies: {'count': {'()': []}, '=>items': {'[]': [], 'title': true, 'year': true}}}
           )
         ).toEqual({
           movies: {
@@ -77,6 +77,44 @@ describe('@deepr/runtime', () => {
               {title: 'The Matrix', year: 1999}
             ]
           }
+        });
+      });
+
+      test('Get a slice of a collection', () => {
+        const object = {
+          movies: [
+            {title: 'Inception', year: 2010},
+            {title: 'The Matrix', year: 1999}
+          ]
+        };
+
+        expect(invokeQuery(object, {movies: {'[]': [0, 1], 'title': true, 'year': true}})).toEqual({
+          movies: [{title: 'Inception', year: 2010}]
+        });
+
+        expect(invokeQuery(object, {movies: {'[]': [-1], 'title': true, 'year': true}})).toEqual({
+          movies: [{title: 'The Matrix', year: 1999}]
+        });
+      });
+
+      test('Get an item of a collection', () => {
+        const object = {
+          movies: [
+            {title: 'Inception', year: 2010},
+            {title: 'The Matrix', year: 1999}
+          ]
+        };
+
+        expect(
+          invokeQuery(object, {'movies=>movie': {'[]': 0, 'title': true, 'year': true}})
+        ).toEqual({
+          movie: {title: 'Inception', year: 2010}
+        });
+
+        expect(
+          invokeQuery(object, {'movies=>movie': {'[]': -1, 'title': true, 'year': true}})
+        ).toEqual({
+          movie: {title: 'The Matrix', year: 1999}
         });
       });
     });
@@ -122,7 +160,7 @@ describe('@deepr/runtime', () => {
                 {title: 'The Matrix', year: 1999}
               ])
             },
-            {movies: [{title: true, year: true}]}
+            {movies: {'[]': [], 'title': true, 'year': true}}
           )
         ).toEqual({
           movies: [
@@ -146,7 +184,7 @@ describe('@deepr/runtime', () => {
                 }
               }
             },
-            {movies: {'count': {'()': []}, '=>items': [{title: true, year: true}]}}
+            {movies: {'count': {'()': []}, '=>items': {'[]': [], 'title': true, 'year': true}}}
           )
         ).toEqual({
           movies: {
@@ -221,8 +259,14 @@ describe('@deepr/runtime', () => {
             }
           },
           {
-            'movies=>actionMovies': {'()': [{filter: {genre: 'action'}}], '=>': [{title: true}]},
-            'movies=>dramaMovies': {'()': [{filter: {genre: 'drama'}}], '=>': [{title: true}]}
+            'movies=>actionMovies': {
+              '()': [{filter: {genre: 'action'}}],
+              '=>': {'[]': [], 'title': true}
+            },
+            'movies=>dramaMovies': {
+              '()': [{filter: {genre: 'drama'}}],
+              '=>': {'[]': [], 'title': true}
+            }
           }
         )
       ).toEqual({
@@ -245,7 +289,7 @@ describe('@deepr/runtime', () => {
               }
             }
           },
-          {movies: {'count': {'()': []}, '=>items': [{title: true}]}}
+          {movies: {'count': {'()': []}, '=>items': {'[]': [], 'title': true}}}
         )
       ).toEqual({
         movies: {
@@ -307,10 +351,10 @@ describe('@deepr/runtime', () => {
     test('Array', () => {
       expect(
         invokeQuery(
-          {movies: [{title: 'Inception'}, {title: 'The Matrix'}, {title: 'Forest Gump'}]},
-          {movies: [{title: true}]}
+          {movie: {title: 'Inception', year: 2020}},
+          {movie: [{title: true}, {year: true}]}
         )
-      ).toEqual({movies: [{title: 'Inception'}, {title: 'The Matrix'}, {title: 'Forest Gump'}]});
+      ).toEqual({movie: [{title: 'Inception'}, {year: 2020}]});
     });
   });
 

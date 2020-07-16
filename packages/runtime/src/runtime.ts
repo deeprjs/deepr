@@ -1,7 +1,7 @@
 import {possiblyAsync} from 'possibly-async';
 import {PromiseLikeable} from 'core-helpers';
 
-import {Expression} from './expression';
+import {Expression, SingleExpression} from './expression';
 
 export type InvokeExpressionOptions = {
   context?: any;
@@ -34,7 +34,15 @@ function _invokeExpression(
   expression: Expression,
   options: InvokeExpressionOptions,
   _isMapping = false
-) {
+): unknown {
+  if (Array.isArray(expression)) {
+    const results = possiblyAsync.map(expression, (expression) =>
+      _invokeExpression(target, expression, options, true)
+    );
+
+    return results;
+  }
+
   const {errorHandler} = options;
 
   return possiblyAsync.invoke(
@@ -66,7 +74,7 @@ function __invokeExpression(
     useCollectionElements,
     nestedExpressions,
     nextExpression
-  }: Expression,
+  }: SingleExpression,
   options: InvokeExpressionOptions
 ): unknown {
   target = sourceKey ? evaluateKey(target, sourceKey, {params, isOptional}, options) : target;
@@ -88,19 +96,45 @@ function __invokeExpression(
       throw new Error(`Cannot execute a query on \`undefined\` (key: '${sourceKey}')`);
     }
 
-    if (useCollectionElements) {
-      const collection = target;
+    if (useCollectionElements !== undefined) {
+      let collection = target;
 
-      const results = possiblyAsync.map(collection, function (item: any) {
-        return _invokeExpression(
-          item,
-          {sourceKey: '', nestedExpressions, nextExpression},
-          options,
-          true
-        );
-      });
+      if (typeof useCollectionElements === 'number') {
+        let index = useCollectionElements;
 
-      return results;
+        if (index < 0) {
+          index = collection.length + index;
+        }
+
+        target = collection[index];
+
+        if (target === undefined) {
+          if (isOptional) {
+            return undefined;
+          }
+
+          throw new Error(
+            `Cannot execute a query on a missing collection item (key: '${sourceKey}', index: ${index})`
+          );
+        }
+      } else {
+        const indexes = useCollectionElements;
+
+        if (indexes.length > 0) {
+          collection = collection.slice(...indexes);
+        }
+
+        const results = possiblyAsync.map(collection, function (item: any) {
+          return _invokeExpression(
+            item,
+            {sourceKey: '', nestedExpressions, nextExpression},
+            options,
+            true
+          );
+        });
+
+        return results;
+      }
     }
 
     if (nextExpression) {
@@ -149,7 +183,6 @@ function evaluateAttribute(
   });
 }
 
-// eslint-disable-next-line max-params
 function evaluateMethod(
   target: any,
   key: string,
@@ -176,7 +209,6 @@ function evaluateMethod(
   });
 }
 
-// eslint-disable-next-line max-params
 function evaluateAuthorizer(
   target: any,
   authorizer: Authorizer | undefined,

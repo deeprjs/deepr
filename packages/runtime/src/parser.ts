@@ -1,21 +1,23 @@
 import {Query} from './query';
-import {Expression} from './expression';
+import {Expression, SingleExpression} from './expression';
 
 /*
 parseQuery(query) => expression
 
 Transform a query:
+
 {
   "getMovies=>actionMovies": {
     "()": [{"genre": "action"}],
     "reverse=>": {
       "()": [],
-      "=>" [{"title": true, "year": true}]
+      "=>" {"[]": [], "title": true, "year": true}
     }
   }
 }
 
 Into an expression that is easier to execute by the runtime:
+
 {
   "sourceKey": "",
   "nestedExpressions": {
@@ -25,7 +27,7 @@ Into an expression that is easier to execute by the runtime:
       "nextExpression": {
         "sourceKey": "reverse",
         "params": [],
-        "useCollectionElements": true,
+        "useCollectionElements": [],
         "nestedExpressions": {
           "title": {
             "sourceKey": "title"
@@ -67,7 +69,6 @@ export function parseQuery(
   return _parseQuery(query, {}, {ignoreKeys, acceptKeys, ignoreBuiltInKeys});
 }
 
-// eslint-disable-next-line complexity
 function _parseQuery(
   query: Query,
   {sourceKey = '', isOptional}: {sourceKey?: string; isOptional?: boolean},
@@ -77,20 +78,13 @@ function _parseQuery(
     ignoreBuiltInKeys
   }: {ignoreKeys: Pattern[]; acceptKeys: Pattern[]; ignoreBuiltInKeys: boolean}
 ): Expression {
-  if (query === undefined) {
-    throw new Error(`The 'query' parameter is missing`);
+  if (Array.isArray(query)) {
+    return query.map((query) =>
+      _parseQuery(query, {sourceKey, isOptional}, {ignoreKeys, acceptKeys, ignoreBuiltInKeys})
+    ) as SingleExpression[];
   }
 
   const expression: Expression = {sourceKey, isOptional};
-
-  if (Array.isArray(query)) {
-    if (query.length !== 1) {
-      throw new Error('An array should contain exactly one item');
-    }
-
-    expression.useCollectionElements = true;
-    query = query[0];
-  }
 
   if (query === true) {
     return expression;
@@ -101,6 +95,7 @@ function _parseQuery(
   }
 
   let params: any[] | undefined;
+  let useCollectionElements: number | [number?, number?] | undefined;
   let sourceValue: any;
   let nestedExpressions: {[key: string]: Expression} | undefined;
   let nextExpression: Expression | undefined;
@@ -111,12 +106,35 @@ function _parseQuery(
         throw new Error('Multiple parameters found at the same level');
       }
 
-      if (!Array.isArray(value)) {
-        throw new Error('Parameters must be specified in an array');
+      if (Array.isArray(value)) {
+        params = value;
+        continue;
       }
 
-      params = value;
-      continue;
+      throw new Error('Parameters must be specified in an array');
+    }
+
+    if (key === '[]') {
+      if (useCollectionElements !== undefined) {
+        throw new Error('Multiple item accessors found at the same level');
+      }
+
+      if (typeof value === 'number') {
+        useCollectionElements = value;
+        continue;
+      }
+
+      if (
+        Array.isArray(value) &&
+        (value.length === 0 ||
+          (value.length === 1 && typeof value[0] === 'number') ||
+          (value.length === 2 && typeof value[0] === 'number' && typeof value[1] === 'number'))
+      ) {
+        useCollectionElements = value as [number?, number?];
+        continue;
+      }
+
+      throw new Error('Item accessors must be a number, or an array of 0, 1, or 2 numbers');
     }
 
     if (key === '<=') {
@@ -161,6 +179,10 @@ function _parseQuery(
 
   if (params !== undefined) {
     expression.params = params;
+  }
+
+  if (useCollectionElements !== undefined) {
+    expression.useCollectionElements = useCollectionElements;
   }
 
   if (sourceValue !== undefined) {

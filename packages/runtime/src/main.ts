@@ -1,12 +1,10 @@
-import {possiblyAsync} from 'possibly-async';
-
 import {Query} from './query';
 import {parseQuery, ParseQueryOptions} from './parser';
 import {invokeExpression, InvokeExpressionOptions} from './runtime';
 
 export function invokeQuery(
   root: any,
-  query: Query | Query[],
+  query: Query,
   {
     context,
     ignoreKeys,
@@ -24,23 +22,9 @@ export function invokeQuery(
     throw new Error(`The 'query' parameter is missing`);
   }
 
-  if (Array.isArray(query)) {
-    const queries = query;
-    return possiblyAsync.map(queries, function (query: Query) {
-      return invokeQuery(root, query, {
-        context,
-        ignoreKeys,
-        acceptKeys,
-        ignoreBuiltInKeys,
-        authorizer,
-        errorHandler
-      });
-    });
-  }
+  const expression = parseQuery(query, {ignoreKeys, acceptKeys, ignoreBuiltInKeys});
 
-  return invokeExpression(root, parseQuery(query, {ignoreKeys, acceptKeys, ignoreBuiltInKeys}), {
-    context,
-    authorizer,
-    errorHandler
-  });
+  const result = invokeExpression(root, expression, {context, authorizer, errorHandler});
+
+  return result;
 }

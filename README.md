@@ -56,7 +56,9 @@ We love the main idea behind GraphQL, especially the ability to compose method c
 | Unnesting           |  ✅   |         |      |
 | Root mutations      |  ✅   |   ✅    |  ✅  |
 | Deep mutations      |  ✅   |         |      |
-| Collections         |  ✅   |         |  ✅  |
+| Collections         |  ✅   |   ✅    |  ✅  |
+| Collection items    |  ✅   |         |  ✅  |
+| Collection slices   |  ✅   |         |      |
 | Source values       |  ✅   |         |      |
 | No additional layer |  ✅   |         |      |
 | Type system         |  (1)  |   ✅    |      |
@@ -103,6 +105,8 @@ The response will be:
 
 So far, it looks like GraphQL. Since we are using JSON objects, the only significant difference is that we must specify a value for the keys `title` and `year`. Specifying `true` means that we want to return the corresponding field.
 
+### Collections
+
 Instead of querying a single movie, let's query a collection of movies:
 
 ```json
@@ -123,20 +127,21 @@ Nothing surprising here, we are just querying the `count` field on the `movies` 
 }
 ```
 
-Now, you might ask yourself, how can I reach the elements of the `movies` collection? That is easy:
+### Collection items
+
+Now, you might ask yourself, how can I reach the items of the `movies` collection? That is easy:
 
 ```json
 {
-  "movies": [
-    {
-      "title": true,
-      "year": true
-    }
-  ]
+  "movies": {
+    "[]": [],
+    "title": true,
+    "year": true
+  }
 }
 ```
 
-By embedding the query object in an array, we specify that the context of the query is the **elements** of the collection rather than the collection itself. As expected, we get the following response:
+By using the special key `[]`, we specify that the context of the query is the **items** of the collection rather than the collection itself. We get the following response:
 
 ```json
 {
@@ -153,23 +158,90 @@ By embedding the query object in an array, we specify that the context of the qu
 }
 ```
 
-Now, let's see how to query both a collection and its elements:
+The value associated with the special key `[]` can be an empty array, an array of one or two numbers, or a simple number.
+
+With an empty array (such as in the previous example), we get all the items of a collection.
+
+With an array of numbers, we get a slice of a collection in a similar way to the [`slice()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/slice) method in JavaScript. For example, to get the first two items of the `movies` collection, we can use the following query:
+
+```json
+{
+  "movies": {
+    "[]": [0, 2],
+    "title": true,
+    "year": true
+  }
+}
+```
+
+We get the following response:
+
+```json
+{
+  "movies": [
+    {
+      "title": "Inception",
+      "year": 2010
+    },
+    {
+      "title": "The Matrix",
+      "year": 1999
+    }
+  ]
+}
+```
+
+To get the last two items of a collection, we can use a negative index:
+
+```json
+{
+  "movies": {
+    "[]": [-2],
+    "title": true,
+    "year": true
+  }
+}
+```
+
+Finally, to get a particular item in a collection, we can use a simple number. For example, to get the first item of the `movies` collection, we can write:
+
+```json
+{
+  "movies": {
+    "[]": 0,
+    "title": true,
+    "year": true
+  }
+}
+```
+
+Note that in this case the item is returned directly, and it is not embedded in an array like in the previous examples:
+
+```json
+{
+  "movies": {
+    "title": "Inception",
+    "year": 2010
+  }
+}
+```
+
+Now, let's see how to query both a collection and its items:
 
 ```json
 {
   "movies": {
     "count": true,
-    "=>items": [
-      {
-        "title": true,
-        "year": true
-      }
-    ]
+    "=>items": {
+      "[]": [],
+      "title": true,
+      "year": true
+    }
   }
 }
 ```
 
-Using the key `"=>items"` means that we take the current context (the collection of movies) and we put it under a new key called `items`. As a result, we get the following:
+Using the key `"=>items"` means that we take the current context (the collection of movies) and we put it under a new key called `items` (more explanation on this topic later). As a result, we get the following:
 
 ```json
 {
@@ -195,28 +267,22 @@ So far, we have seen how to query fields. Let's now see how to invoke methods:
 
 ```json
 {
-  "getMovies": {
-    "()": [{"filter": {"year": 2010}, "limit": 1}],
-    "=>": [
-      {
-        "title": true
-      }
-    ]
+  "getMovie": {
+    "()": [{"id": "abc123"}],
+    "title": true
   }
 }
 ```
 
-The `()` key indicates that we want to invoke the `getMovies` method with the parameters specified in the corresponding array.
+The special key `()` indicates that we want to invoke the `getMovie` method with the parameters specified in the corresponding array.
 
 We get the following result:
 
 ```json
 {
-  "getMovies": [
-    {
-      "title": "Inception"
-    }
-  ]
+  "getMovie": {
+    "title": "Inception"
+  }
 }
 ```
 
@@ -272,19 +338,17 @@ For example, in the following query, we first call the `getMovies` method and as
 {
   "getMovies=>actionMovies": {
     "()": [{"filter": {"genre": "action"}}],
-    "=>": [
-      {
-        "title": true
-      }
-    ]
+    "=>": {
+      "[]": [],
+      "title": true
+    }
   },
   "getMovies=>dramaMovies": {
     "()": [{"filter": {"genre": "drama"}}],
-    "=>": [
-      {
-        "title": true
-      }
-    ]
+    "=>": {
+      "[]": [],
+      "title": true
+    }
   }
 }
 ```
@@ -319,16 +383,15 @@ For example, in the following query, `=>items` means we take the current context
 {
   "movies": {
     "count": true,
-    "=>items": [
-      {
-        "title": true
-      }
-    ]
+    "=>items": {
+      "[]": [],
+      "title": true
+    }
   }
 }
 ```
 
-Doing this, we can query both a collection and its elements to produce results such as:
+Doing this, we can query both a collection and its items to produce results such as:
 
 ```json
 {
@@ -410,22 +473,21 @@ Both queries will produce the following response:
 }
 ```
 
-This feature is particularly useful to access the elements of a collection. For example:
+This feature is particularly useful to access the items of a collection. For example:
 
 ```json
 {
   "getMovies": {
     "()": [{"filter": {"country": "USA"}}],
-    "=>": [
-      {
-        "title": true
-      }
-    ]
+    "=>": {
+      "[]": [],
+      "title": true
+    }
   }
 }
 ```
 
-will output:
+Will output:
 
 ```json
 {
@@ -497,19 +559,32 @@ As expected, this will produce:
 
 #### Array
 
-Finally, by specifying an array, we can access the elements of a collection. For example:
+Finally, by using an array, we can specify a sequence of subqueries to be executed in order. For example:
 
 ```json
 {
-  "movies": [{"title": true}]
+  "movies": [
+    {
+      "getByTitle=>": {
+        "()": ["Inception"],
+        "title": true
+      }
+    },
+    {
+      "getByTitle=>": {
+        "()": ["The Matrix"],
+        "title": true
+      }
+    }
+  ]
 }
 ```
 
-will return:
+Will return:
 
 ```json
 {
-  "movies": [{"title": "Inception"}, {"title": "The Matrix"}, {"title": "Forest Gump"}]
+  "movies": [{"title": "Inception"}, {"title": "The Matrix"}]
 }
 ```
 
@@ -555,12 +630,11 @@ Now, let's put into practice what we have just seen to compose a more complex qu
           "()": [5],
           "limit=>": {
             "()": [10],
-            "=>": [
-              {
-                "title": true,
-                "year": true
-              }
-            ]
+            "=>": {
+              "[]": [],
+              "title": true,
+              "year": true
+            }
           }
         }
       }
@@ -730,21 +804,19 @@ This guide would not be complete without demonstrating another common use case: 
 {
   "getMovies=>movies": {
     "()": [{"filter": {"country": "USA"}}],
-    "=>": [
-      {
-        "title": true,
-        "year": true,
-        "getActors=>actors": {
-          "()": [{"sort": {"by": "popularity"}, "limit": 2}],
-          "=>": [
-            {
-              "fullName": true,
-              "photoURL": true
-            }
-          ]
+    "=>": {
+      "[]": [],
+      "title": true,
+      "year": true,
+      "getActors=>actors": {
+        "()": [{"sort": {"by": "popularity"}, "limit": 2}],
+        "=>": {
+          "[]": [],
+          "fullName": true,
+          "photoURL": true
         }
       }
-    ]
+    }
   }
 }
 ```
@@ -792,7 +864,7 @@ We do not believe that [subscriptions](https://facebook.github.io/graphql/draft/
 
 ## Runtime
 
-To execute a Deepr query, we need a runtime. We implemented a simple one in JavaScript. Here it is:
+To execute a Deepr query, we need a runtime. Here is a simple one implemented in JavaScript:
 
 https://github.com/deeprjs/deepr/tree/master/packages/runtime
 

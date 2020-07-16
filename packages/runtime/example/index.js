@@ -25,10 +25,24 @@ const {invokeQuery} = require('..');
       '()': [{id: 'abc123'}],
       '=>': {
         title: true,
-        actors: [{fullName: true}]
+        actors: {'[]': [], 'fullName': true}
       }
     }
   });
 
   console.log(util.inspect(result, {depth: null}));
 })();
+
+/*
+Should output:
+
+{
+  movie: {
+    title: 'Inception',
+    actors: [
+      { fullName: 'Leonardo DiCaprio' },
+      { fullName: 'Joseph Gordon-Levitt' }
+    ]
+  }
+}
+*/
