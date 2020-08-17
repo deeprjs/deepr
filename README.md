@@ -46,28 +46,29 @@ We love the main idea behind GraphQL, especially the ability to compose method c
 
 ## Feature comparison
 
-|                     | Deepr | GraphQL | REST |
-| ------------------- | :---: | :-----: | :--: |
-| Root queries        |  ✅   |   ✅    |  ✅  |
-| Deep queries        |  ✅   |   ✅    |      |
-| Parallel queries    |  (1)  |   ✅    |      |
-| Sequential queries  |  ✅   |         |      |
-| Aliases             |  ✅   |   ✅    |      |
-| Unnesting           |  ✅   |         |      |
-| Root mutations      |  ✅   |   ✅    |  ✅  |
-| Deep mutations      |  ✅   |         |      |
-| Collections         |  ✅   |   ✅    |  ✅  |
-| Collection items    |  ✅   |         |  ✅  |
-| Collection slices   |  ✅   |         |      |
-| Source values       |  ✅   |         |      |
-| No additional layer |  ✅   |         |      |
-| Type system         |  (1)  |   ✅    |      |
-| Introspection       |  (2)  |   ✅    |      |
-| No extra language   |  ✅   |         |  ✅  |
-| Subscriptions       |  (1)  |   ✅    |      |
+|                     | Deepr | GraphQL |  REST  |
+| ------------------- | :---: | :-----: | :----: |
+| Root queries        |  ✅   |   ✅    |   ✅   |
+| Deep queries        |  ✅   |   ✅    |        |
+| Parallel queries    |  (1)  |   ✅    | ✅ (2) |
+| Sequential queries  |  ✅   |         |        |
+| Aliases             |  ✅   |   ✅    |        |
+| Unnesting           |  ✅   |         |        |
+| Root mutations      |  ✅   |   ✅    |   ✅   |
+| Deep mutations      |  ✅   |         |        |
+| Collections         |  ✅   |   ✅    |   ✅   |
+| Collection items    |  ✅   |         |   ✅   |
+| Collection slices   |  ✅   |         |        |
+| Source values       |  ✅   |         |        |
+| No additional layer |  ✅   |         |        |
+| Type system         |  (1)  |   ✅    |        |
+| Introspection       |  (3)  |   ✅    |        |
+| No extra language   |  ✅   |         |   ✅   |
+| Subscriptions       |  (1)  |   ✅    |        |
 
 1. We believe these features should be implemented at another layer of the stack.
-2. Introspection will come later in the form of an extension.
+2. REST parallel queries are possible with HTTP/2.
+3. Introspection might come later in the form of an extension.
 
 ## Guide
 
