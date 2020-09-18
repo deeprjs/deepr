@@ -1,6 +1,6 @@
 # @deepr/runtime
 
-Simple [Deepr](https://github.com/deeprjs/deepr) runtime.
+Simple [Deepr](https://deepr.io) runtime.
 
 ## Installation
 
