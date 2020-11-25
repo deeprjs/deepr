@@ -552,7 +552,7 @@ As expected, this will produce:
 {
   "movie": {
     "director": {
-      "name": "Georges Lucas"
+      "name": "George Lucas"
     }
   }
 }
