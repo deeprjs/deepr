@@ -492,7 +492,11 @@ Will output:
 
 ```json
 {
-  "getMovies": [{"title": "Inception"}, {"title": "The Matrix"}, {"title": "Forest Gump"}]
+  "getMovies": [
+    {"title": "Inception"},
+    {"title": "The Matrix"},
+    {"title": "Forest Gump"}
+  ]
 }
 ```
 
@@ -711,7 +715,11 @@ This will return:
 
 ```json
 {
-  "movie": {"id": "cjrts72gy00ik01rv6eins4se", "title": "Avatar", "country": "USA"}
+  "movie": {
+    "id": "cjrts72gy00ik01rv6eins4se",
+    "title": "Avatar",
+    "country": "USA"
+  }
 }
 ```
 
@@ -865,7 +873,7 @@ We do not believe that [subscriptions](https://facebook.github.io/graphql/draft/
 
 ## Runtime
 
-To execute a Deepr query, we need a runtime. Here is a simple one implemented in JavaScript:
+To execute a Deepr query, you need a runtime. Here is a simple one implemented in JavaScript:
 
 https://github.com/deeprjs/deepr/tree/master/packages/runtime
 

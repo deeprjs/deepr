@@ -185,28 +185,6 @@ function errorHandler(error) {
 }
 ```
 
-## Contribute
-
-This project uses [Run](https://run.tools) to manage the development environment.
-
-Build the transpiled files:
-
-```
-run . @build
-```
-
-Run the test suite:
-
-```
-run . @test
-```
-
-Run the example:
-
-```
-node ./packages/runtime/example
-```
-
 ## License
 
 MIT
