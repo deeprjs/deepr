@@ -1,7 +1,7 @@
 import {possiblyAsync} from 'possibly-async';
-import {PromiseLikeable} from 'core-helpers';
+import {hasOwnProperty, PromiseLikeable} from 'core-helpers';
 
-import {Expression, SingleExpression} from './expression';
+import {Expression, SingleExpression, isParallel} from './expression';
 
 export type InvokeExpressionOptions = {
   context?: any;
@@ -36,11 +36,15 @@ function _invokeExpression(
   _isMapping = false
 ): unknown {
   if (Array.isArray(expression)) {
-    const results = possiblyAsync.map(expression, (expression) =>
+    if (hasOwnProperty(expression, isParallel)) {
+      return possiblyAsync.all(
+        expression.map((expression) => _invokeExpression(target, expression, options))
+      );
+    }
+
+    return possiblyAsync.map(expression, (expression) =>
       _invokeExpression(target, expression, options, true)
     );
-
-    return results;
   }
 
   const {errorHandler} = options;

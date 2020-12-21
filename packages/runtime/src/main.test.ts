@@ -468,6 +468,36 @@ describe('@deepr/runtime', () => {
     });
   });
 
+  describe('Parallel queries', () => {
+    test('Call a method two times concurrently', async () => {
+      let counter: number;
+      let brokenCounter: number;
+
+      const root = {
+        increment: async () => {
+          const currentBrokenCounter = brokenCounter;
+          await sleep(10);
+          counter++;
+          brokenCounter = currentBrokenCounter + 1;
+        }
+      };
+
+      // Sequential execution
+      counter = 0;
+      brokenCounter = 0;
+      await invokeQuery(root, [{increment: {'()': []}}, {increment: {'()': []}}]);
+      expect(counter).toBe(2);
+      expect(brokenCounter).toBe(2);
+
+      // Parallel execution
+      counter = 0;
+      brokenCounter = 0;
+      await invokeQuery(root, {'||': [{increment: {'()': []}}, {increment: {'()': []}}]});
+      expect(counter).toBe(2);
+      expect(brokenCounter).toBe(1);
+    });
+  });
+
   describe('Options', () => {
     test('context', () => {
       expect(
@@ -686,5 +716,11 @@ function makePromise(value: any) {
       }
       resolve(value);
     }, 5);
+  });
+}
+
+function sleep(duration: number) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, duration);
   });
 }

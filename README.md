@@ -34,7 +34,7 @@ Another issue is the GraphQL execution model. Having queries executed in paralle
 }
 ```
 
-Parallelizing the execution of the requests is an optimization matter, and we believe it would be better if it is addressed at another layer of the stack.
+Parallel execution is an optimization matter and we believe it should be under the control of the developer.
 
 Then, there is the way the execution is handled. With GraphQL, it is required to implement resolvers for each operation. This resolver layer seems a little cumbersome to us. When the business layer is implemented in an object-oriented way, why not just directly invoke the methods of the objects? Some would say it is good practice to add an API layer on top of the business layer. Well, we can agree with that. But in any case, we believe that the query execution should not require an additional layer. If some developers want to add an API layer, it is up to them to do so.
 
@@ -50,8 +50,8 @@ We love the main idea behind GraphQL, especially the ability to compose method c
 | ------------------- | :---: | :-----: | :----: |
 | Root queries        |  ✅   |   ✅    |   ✅   |
 | Deep queries        |  ✅   |   ✅    |        |
-| Parallel queries    |  (1)  |   ✅    | ✅ (2) |
 | Sequential queries  |  ✅   |         |        |
+| Parallel queries    |  ✅   |   ✅    | ✅ (2) |
 | Aliases             |  ✅   |   ✅    |        |
 | Unnesting           |  ✅   |         |        |
 | Root mutations      |  ✅   |   ✅    |   ✅   |
@@ -803,6 +803,50 @@ As before, this will return:
     "id": "cjrts72gy00ik01rv6eins4se"
   }
 }
+```
+
+### Parallel queries
+
+Contrary to GraphQL, the default execution model of Deepr is sequential. So when a query is composed of several subqueries, the subqueries are executed one by one from top to bottom.
+
+To specify that some subqueries should be executed in parallel, you can use the special key `||` and list each subquery in an array.
+
+For example, the following query will execute the `getMovie()` method two times in a concurrent way:
+
+```json
+{
+  "||": [
+    {
+      "getMovie": {
+        "()": [{"id": "abc123"}],
+        "title": true
+      }
+    },
+    {
+      "getMovie": {
+        "()": [{"id": "def456"}],
+        "title": true
+      }
+    }
+  ]
+}
+```
+
+The result is returned as follows:
+
+```json
+[
+  {
+    "getMovie": {
+      "title": "Inception"
+    }
+  },
+  {
+    "getMovie": {
+      "title": "The Matrix"
+    }
+  }
+]
 ```
 
 ### Relations

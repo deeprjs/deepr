@@ -9,3 +9,5 @@ export type SingleExpression = {
   nextExpression?: Expression;
   nestedExpressions?: {[key: string]: Expression};
 };
+
+export const isParallel = Symbol('isParallel');

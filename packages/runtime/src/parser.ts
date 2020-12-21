@@ -1,5 +1,5 @@
 import {Query} from './query';
-import {Expression, SingleExpression} from './expression';
+import {Expression, SingleExpression, isParallel} from './expression';
 
 /*
 parseQuery(query) => expression
@@ -82,6 +82,26 @@ function _parseQuery(
     return query.map((query) =>
       _parseQuery(query, {sourceKey, isOptional}, {ignoreKeys, acceptKeys, ignoreBuiltInKeys})
     ) as SingleExpression[];
+  }
+
+  const parallelQueries = (query as any)?.['||'];
+
+  if (parallelQueries !== undefined) {
+    if (Object.keys(query).length !== 1) {
+      throw new Error(`A parallel query key must be the unique entry of an object`);
+    }
+
+    if (!Array.isArray(parallelQueries)) {
+      throw new Error(`A parallel query key ('||') must be associated with an array`);
+    }
+
+    const expressions = parallelQueries.map((query) =>
+      _parseQuery(query, {sourceKey, isOptional}, {ignoreKeys, acceptKeys, ignoreBuiltInKeys})
+    ) as SingleExpression[];
+
+    Object.defineProperty(expressions, isParallel, {value: true});
+
+    return expressions;
   }
 
   const expression: Expression = {sourceKey, isOptional};
