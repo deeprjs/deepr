@@ -145,7 +145,7 @@ For obvious security reasons, it is strongly discouraged to disable this option.
 
 A function that is called for each key to authorize any operation.
 
-The function receives a `key` and an `operation` which can be either `'get'` for reading an attribute or `'call'` for invoking a method.
+The function receives current node, `key` and an `operation` which can be either `'get'` for reading an attribute or `'call'` for invoking a method.
 
 The function must return `true` to authorize an operation. If `false` is returned, the evaluation of the query stops immediately, and an error is thrown.
 
@@ -156,7 +156,7 @@ Finally, the value of `this` in the function is the current node of the query be
 Example:
 
 ```js
-function authorizer(key, operation) {
+function authorizer(node, key, operation) {
   if (key === 'title' && operation === 'get') {
     return true; // Authorize getting the 'title' attribute
   }
