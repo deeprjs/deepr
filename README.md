@@ -915,11 +915,23 @@ This will return:
 
 We do not believe that [subscriptions](https://facebook.github.io/graphql/draft/#sec-Subscription) should be included in the core specifications of Deepr. We acknowledge it is an important feature, though, and it might be added later in the form of an extension.
 
-## Runtime
+## Runtimes
 
-To execute a Deepr query, you need a runtime. Here is a simple one implemented in JavaScript:
+To execute a Deepr query, you need a runtime.
 
-https://github.com/deeprjs/deepr/tree/master/packages/runtime
+### Reference runtime
+
+Here is the reference runtime implemented in TypeScript:
+
+- JavaScript/TypeScript: https://github.com/deeprjs/deepr/tree/master/packages/runtime
+
+### Community runtimes
+
+The community is free to implement alternative runtimes.
+
+Here is the first runtime implemented by the community:
+
+- PHP: https://github.com/stefanak-michal/deepr-php
 
 ## Specifications
 
