@@ -1,6 +1,6 @@
 {
   "name": "deepr",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "A specification for invoking remote methods, deeply!",
   "keywords": [
@@ -13,8 +13,8 @@
   "repository": "https://github.com/deeprjs/deepr",
   "prettier": "@mvila/prettierrc",
   "devDependencies": {
-    "@mvila/prettierrc": "^1.1.0",
-    "lerna": "^3.20.2",
-    "prettier": "^2.1.2"
+    "@mvila/prettierrc": "^1.1.1",
+    "lerna": "^6.0.1",
+    "prettier": "^2.7.1"
   }
 }
